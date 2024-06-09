@@ -4,6 +4,7 @@
 - [NVGT](https://nvgt.gg/) is in short a game engine similar to bgt developed by [Sam Tupy](https://samtupy.com/) on [git hub](https://github.com/samtupy/nvgt/) with lots of features. It allows it for users to create audio games or simple programs.
 - Mini means or is another word for: Small, thiny.
 - Games are things you can play, wether it is offline or online or in real life, that should be clear at all.
+
 Together these form the words NVGT Mini Games. So these are a complilation of small and thiny games you can play offline. 
 
 ### The power
@@ -12,16 +13,14 @@ This mini game collection is open source, allows it everyone to contribute, read
 
 #### A strong in-build documentation:
 The documentation can be accessed in two ways:
-- 1. Using the program's strong UI and access the documentation with the read only editor over the main menu.
-- 2. Viewing it in the documents folder itself, with an editor up to your choose.
+- Using the program's strong UI and access the documentation with the read only editor over the main menu.
+- Viewing it in the documents folder itself, with an editor up to your choose.
 Either way it is strong, well-organiced and easy to understand!
 
 
 ### The process of building
 Note: If you simply want to run it, you only need step 2.
-<html>
-<ul>
-<li> #### 1. [NVGT](https://nvgt.gg/downloads/) </li>
+#### 1. [NVGT](https://nvgt.gg/downloads/)
 First you need to download NVGT from the above link.
 ##### Version notes:
 - 0.85.0: This is not useable unless you want to modify the code a little.
@@ -34,14 +33,12 @@ After you'Ve done it, you can compile the script:
 - Press enter on release.
 Success! You'Ve compiled the game by your own! There's still to do, though.
 
-<li> #### 2. [aria2c](https://github.com/aria/aria2/releases/) </li>
+#### 2. [aria2c](https://github.com/aria/aria2/releases/)
 You need to download the latest release of aria2c in order the game is able to download things which may come up in future.
 
 That was all! You've built it!
-</ul>
-</html>
+
 ### Contributors:
 - [Garo](https://github.com/garo-pro): Creator, main developer.
-- [Jonathan](https://github.com/jonathans859)
 
 --- End of readme file ---
