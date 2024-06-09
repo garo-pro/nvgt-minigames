@@ -1,0 +1,31 @@
+int tries=1;
+void main() {
+show_window("guess the number");
+int num=random(1,100);
+alert("Info", "On the next screen, please enter A number from 1 to 100.");
+while(true)
+{
+wait(5);
+if(tries>=10)
+{
+alert("Sorry","You guessed wrong 10 times.");
+exit();
+}
+string guess=input_box("Input", "Please enter A number from 1 to 100");
+if (guess<1 || guess > 100) {
+alert("Error", "Invalid option");
+}
+if (guess<num) {
+alert("Info", "Too low");
+tries+=1;
+}
+if (guess>num) {
+alert("info", "Too high");
+tries+=1;
+}
+if (guess==num) {
+alert("success", "you did it");
+exit();
+}
+}
+}
