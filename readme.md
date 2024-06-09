@@ -2,10 +2,10 @@
 ### What is NVGT Mini Games?
 #### Let's split it up:
 - [NVGT](https://nvgt.gg/) is in short a game engine similar to bgt developed by [Sam Tupy](https://samtupy.com/) on [git hub](https://github.com/samtupy/nvgt/) with lots of features. It allows it for users to create audio games or simple programs.
-- Mini means or is another word for: Small, thiny.
+- Mini means or is another word for: Small, tiny.
 - Games are things you can play, wether it is offline or online or in real life, that should be clear at all.
 
-Together these form the words NVGT Mini Games. So these are a complilation of small and thiny games you can play offline. 
+Together these form the words NVGT Mini Games. So these are a complilation of small and tiny games you can play offline. 
 
 ### The power
 #### The power of open source:
