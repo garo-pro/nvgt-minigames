@@ -1,0 +1,28 @@
+namespace src
+{
+void play_wait(string filename,sound@ f=s, double vol=0, double pitch=100, double pan=0)
+{
+if(f.active) f.close();
+f.load(filename);
+if(!f.active) return;
+f.volume=vol;
+f.pitch=pitch;
+f.pan=pan;
+f.play();
+while(f.playing)
+{
+wait(5);
+}
+f.close();
+}
+void play(string filename,sound@ f=s, double vol=0, double pitch=100, double pan=0)
+{
+if(f.active) f.close();
+f.load(filename);
+if(!f.active) return;
+f.volume=vol;
+f.pitch=pitch;
+f.pan=pan;
+f.play();
+}
+}
