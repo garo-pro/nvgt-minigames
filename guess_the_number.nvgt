@@ -11,7 +11,7 @@ if(tries>=10)
 alert("Sorry","You guessed wrong 10 times.");
 exit();
 }
-string guess=input_box("Input", "Please enter A number from 1 to 100");
+int guess=parse_int(input_box("Input", "Please enter A number from 1 to 100"));
 if (guess<1 || guess > 100) {
 alert("Error", "Invalid option");
 }

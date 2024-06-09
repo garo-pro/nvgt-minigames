@@ -1,0 +1,162 @@
+// basic menu script
+// by parker watson, feb 9 2024, edit apr 6 2024, edit to convert to nvgt jun 4 2024
+// this is a no-frills menu script. No fdirst letter navigation or disabled menu items, just your standard selectable items.
+// Include sound_pool.nvgt to use this script in another file
+class menu
+{
+string[] items;
+string[] refs;
+int index=-1;
+bool running=false;
+bool wrap=true;
+bool music_added=false;
+string click_sound;
+string edge_sound;
+string enter_sound;
+string open_sound;
+sound_pool mp;
+sound music;
+menu()
+{
+reset();
+}
+void reset(bool completely=true)
+{
+items.resize(0);
+refs.resize(0);
+index=-1;
+if (completely)
+{
+click_sound="";
+edge_sound="";
+enter_sound="";
+open_sound="";
+music.close();
+music_added=false;
+}
+}
+bool add_music(string path,int vol=-7)
+{
+if (!music.active and !music.playing) music.load(path);
+music.volume=vol;
+if (music.active)
+{
+music_added=true;
+return true;
+}
+return false;
+}
+bool play_music()
+{
+if (music.active and !music.playing)
+return music.play_looped();
+return false;
+}
+void add_item(string name, string ref)
+{
+items.insert_last(name);
+refs.insert_last(ref);
+}
+string run(string intro)
+{
+if (items.length()<=0 or refs.length()<=0) return "";
+play_music();
+play_open();
+speak(intro);
+running=true;
+while(running)
+{
+wait(5);
+if (key_pressed(KEY_UP))
+{
+index--;
+if (index<0)
+{
+if (wrap)
+{
+index=items.length()-1;
+}
+else
+{
+play_edge();
+index=0;
+}
+}
+play_click();
+speak(items[index]);
+}
+if (key_pressed(KEY_DOWN))
+{
+index++;
+if (index>items.length()-1)
+{
+if (wrap)
+{
+index=0;
+}
+else
+{
+play_edge();
+index=items.length()-1;
+}
+}
+play_click();
+speak(items[index]);
+}
+if (key_pressed(KEY_PAGEDOWN) and music_added)
+{
+music.volume=music.volume-2;
+}
+if (key_pressed(KEY_PAGEUP) and music_added)
+{
+music.volume=music.volume+2;
+}
+if (key_pressed(KEY_RETURN) and index>-1)
+{
+play_enter();
+running=false;
+return refs[index];
+}
+if (key_pressed(KEY_ESCAPE))
+{
+running=false;
+return "";
+}
+}
+return "";
+}
+void fade_music(int fadetime=25)
+{
+timer fadetimer;
+while(music.volume>-60)
+{
+wait(5);
+if (fadetimer.elapsed>fadetime)
+{
+fadetimer.restart();
+music.volume=music.volume-1;
+}
+}
+music.stop();
+}
+void play_click()
+{
+if (click_sound!="")
+mp.play_stationary(click_sound,false);
+}
+void play_edge()
+{
+if (edge_sound!="")
+mp.play_stationary(edge_sound,false);
+}
+void play_enter()
+{
+if (enter_sound!="")
+mp.play_stationary(enter_sound,false);
+}
+void play_open()
+{
+if (open_sound!="")
+mp.play_stationary(open_sound,false);
+}
+}
