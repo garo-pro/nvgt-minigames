@@ -1,0 +1,30 @@
+int numbox(string intro)
+{
+speak(intro);
+string input;
+while(true)
+{
+wait(5);
+string c=get_characters();
+if (c.is_digits())
+{
+speak(c);
+input+=c;
+}
+if (key_pressed(KEY_BACK) and input.length()>0)
+{
+string l=input[input.length()-1];
+input.erase(input.length()-1,1);
+speak(l);
+}
+if (key_pressed(KEY_ESCAPE))
+{
+return 0;
+}
+if (key_pressed(KEY_RETURN))
+{
+break;
+}
+}
+return parse_int(input);
+}
