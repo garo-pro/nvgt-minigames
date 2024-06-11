@@ -62,6 +62,7 @@ view1();
 if(f.is_pressed(d12))
 {
 speak("Bye");
+f.reset();
 exit();
 }
 }
