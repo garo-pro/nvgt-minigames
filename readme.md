@@ -9,7 +9,7 @@ To view the documentation, you can either read it in your text editor of choice,
 The first thing you have to download is NVGT, odviously you need it to be able to build the games.
 To download, click this link:
 (https://nvgt.gg/downloads/)
-Be sure to download the latest version, which at the time of this writing is version 0.86.1.
+Be sure to download the latest version, which at the time of this writing is version 0.86.0.
 After you'Ve downloaded NVGT, you can compile the script.
 - Go to the context menu when you'Ve selected the main script.
 - Press right arrow or enter on the compile submenu.
