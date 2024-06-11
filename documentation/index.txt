@@ -1,5 +1,7 @@
 This is the general overview document of
 NVGT Mini Games
+Note: You are reading one of the first versions of the readme. The readme.md is now different from this one, but we think that this one fits more to this document viewer.
+
 For informations how to play certain games and so on, please check out the other documentations.
 
 What is NVGT Mini Games?
@@ -14,3 +16,4 @@ The power
 The power of open source:
 This mini game collection is open source, allows it everyone to contribute, read and understand the code by it's source.
 
+To understand how you can build this project, please check out the main readme.md file of this repository which is sort of different. Thank you for reading!
