@@ -23,5 +23,6 @@ Once you've done that, you are done building.
 
 ## Contributors:
 - [Garo](https://github.com/garo-pro): Creator, main developer.
+- [Parker](https://github.com/parker13435): Developer.
 
 --- End of readme file ---
