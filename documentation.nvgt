@@ -1,73 +1,54 @@
-// Documentation viewer. Written by Garo at the 9th june 2024. Last updated by Garo at the 9th june 2024
+// Documentation viewer. Written by Garo at the 9th june 2024. Last updated by Harry Min Khant at 13th June 2024
 #include"form.nvgt"
 #include"speech.nvgt"
 #include"file_contents.nvgt"
 audio_form f;
 void main()
 {
-view1();
+view_doc();
 }
-void view1()
+void view_doc(string what="")
 {
-show_window("");
-f.create_window("Select document to view");
+string[] docs=find_files("documentation/*.txt");
+if(docs.length()<1)
+{
+alert("Error","No documentations found!");
+exit();
+return;
+}
+for(uint i=0;i<docs.length();i++) docs[i]=docs[i].replace(".txt","",true);
+if(what!="" && docs.find(what)<0)
+{
+alert("Error","This document "+what+" could not be found");
+exit();
+return;
+}
+f.reset();
+f.create_window((what==""?"Select document to view":"Reading, "+what));
 wait(250);
 // Waits 250 milliseconds (1/4 seconds) so to give the screenreader enough time to speak the window title.
-// Note: It is now going to be ugly regarding UI. I currently cannot create a list with all documents and make only an open button which opens the selected item, though that will hopefully be possible in future.
-int d1=f.create_button("View general informations,");
-// All commas after the names of the buttons so it will be spoken general informations, button and not general informations button.
-f.focus(d1);
-int d3=f.create_button("View the documentation help,");
-int d2=f.create_button("View the black jack readme,");
-int e1=f.create_button("Exit,");
-// That were all buttons for now.
+int l=f.create_list("Documentations");
+for(uint i=0;i<docs.length();i++)
+{
+f.add_list_item(l,docs[i],docs[i]);
+}
+int read=-1;
+if(what!="") read=f.create_input_box("&Text",get_file_contents("documentation/"+what+".txt"),"",0,true,true,false);
+int open=f.create_button("&Open the selected document",true,false);
+f.focus((read>-1?read:l));
+int e1=f.create_button("&Exit",false,true);
 while(true)
 {
 wait(5);
 f.monitor();
-if(f.is_pressed(d1))
+if(f.is_pressed(open))
 {
-read_d("index");
+view_doc(f.get_list_item_id(l,f.get_list_position(l)));
+break;
 }
-if(f.is_pressed(d2))
-{
-read_d("blackjack");
-}
-if(f.is_pressed(d3))
-{
-read_d("documentation");
-}
-if(f.is_pressed(e1))
+else if(f.is_pressed(e1))
 {
 speak("Bye");
-exit();
-}
-}
-}
-void read_d(string document_name)
-{
-f.reset();
-f.create_window("Currently reading: "+document_name);
-wait(250);
-string box=get_file_contents("documentation/"+document_name+".txt");
-int box2=f.create_input_box(document_name,box,"",0,true,true,false);
-f.focus(box2);
-int d11=f.create_button("Read another document,");
-int d12=f.create_button("Close document viewer,");
-while(true)
-{
-wait(5);
-f.monitor();
-if(f.is_pressed(d11))
-{
-speak("Alright");
-f.reset();
-view1();
-}
-if(f.is_pressed(d12))
-{
-speak("Bye");
-f.reset();
 exit();
 }
 }
