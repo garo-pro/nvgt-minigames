@@ -1,3 +1,4 @@
+Documentation updated. Index updated to let it look not that ugly at start, and a documentation documentation added.
 When the button d12 which closes the document reader is pressed after a document has been read, which is forcefully the case when an user wants to exit the documentation viewer, the form now resets before exiting. This don'T really needs to be done, but still.
 A new todo (todo.md) has been added.
 Readme updated so the version of nvgt is actually 0.86.0 instead of 0.86.1

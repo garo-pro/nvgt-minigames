@@ -17,6 +17,7 @@ wait(250);
 int d1=f.create_button("View general informations,");
 // All commas after the names of the buttons so it will be spoken general informations, button and not general informations button.
 f.focus(d1);
+int d3=f.create_button("View the documentation help,");
 int d2=f.create_button("View the black jack readme,");
 int e1=f.create_button("Exit,");
 // That were all buttons for now.
@@ -31,6 +32,10 @@ read_d("index");
 if(f.is_pressed(d2))
 {
 read_d("blackjack");
+}
+if(f.is_pressed(d3))
+{
+read_d("documentation");
 }
 if(f.is_pressed(e1))
 {
