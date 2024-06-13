@@ -14,7 +14,7 @@ while(true)
 {
 wait(5);
 form.monitor();
-int guess=parse_float(form.get_text(a));
+string text=form.get_text(a);
 if(form.is_pressed(x)) exit();
 if(form.is_pressed(guess_it))
 {
@@ -24,18 +24,18 @@ if(tries>=10)
 alert("Sorry","You guessed wrong 10 times.");
 exit();
 }
-if (guess<1 || guess > 100) {
-speak("Number must be between 1 and 100");
-}
-if (guess<num) {
+if(!text.is_alphanumeric()) speak("No number.");
+int guess=parse_float(text);
+if (guess<1 or guess > 100) speak("Number must be between 1 and 100");
+else if (guess<num) {
 speak("To low");
 tries+=1;
 }
-if (guess>num) {
+else if (guess>num) {
 speak("To high");
 tries+=1;
 }
-if (guess==num) {
+else if (guess==num) {
 alert("success", "you did it");
 exit();
 }

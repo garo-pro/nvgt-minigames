@@ -2,7 +2,7 @@
 Welcome to NVGT Minigames, an ever-growing collection of small timewaster games created using the [Nonvisual Gaming Toolkit](https://github.com/samtupy/nvgt). Eventually, we hope to have games in all different categories, from math games, to puzzle games, to word games, and many more.
 Additionally, this collection is open sourced, which means that anyone who wants to add a new game or fix errors in the project can do so, and anyone who wants to learn how any of the games work can look at their source code freely.
 ## Documentation
-To view the documentation, you can either read it in your text editor of choice, or you can view the documentation from the documentation viewer in the main menu.
+To view the documentation, you can either read it in your text editor of choice, or you can view the documentation from the documentation viewer in the root directory.
 ## The process of building
 *Note: If you simply want to run the program, you can skip step 1 and continue to step 2.*
 ### Step 1: Download NVGT
