@@ -3,20 +3,22 @@
 #include"speech.nvgt"
 #include"file_contents.nvgt"
 audio_form f;
+string folder="documentation";
+string extention="txt";
 void main()
 {
 view_doc();
 }
 void view_doc(string what="")
 {
-string[] docs=find_files("documentation/*.txt");
+string[] docs=find_files(folder+"/*."+extention);
 if(docs.length()<1)
 {
 alert("Error","No documentations found!");
 exit();
 return;
 }
-for(uint i=0;i<docs.length();i++) docs[i]=docs[i].replace(".txt","",true);
+for(uint i=0;i<docs.length();i++) docs[i]=docs[i].replace("."+extention,"",true);
 if(what!="" && docs.find(what)<0)
 {
 alert("Error","This document "+what+" could not be found");
@@ -33,7 +35,7 @@ for(uint i=0;i<docs.length();i++)
 f.add_list_item(l,docs[i],docs[i]);
 }
 int read=-1;
-if(what!="") read=f.create_input_box("&Text",get_file_contents("documentation/"+what+".txt"),"",0,true,true,false);
+if(what!="") read=f.create_input_box("&Text",get_file_contents(folder+"/"+what+"."+extention),"",0,true,true,false);
 int open=f.create_button("&Open the selected document",true,false);
 f.focus((read>-1?read:l));
 int e1=f.create_button("&Exit",false,true);
@@ -48,7 +50,7 @@ break;
 }
 else if(f.is_pressed(e1))
 {
-speak("Bye");
+speak("exiting");
 exit();
 }
 }

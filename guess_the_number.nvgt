@@ -21,22 +21,22 @@ if(form.is_pressed(guess_it))
 form.edit_text(a,"",0,0);
 if(tries>=10)
 {
-alert("Sorry","You guessed wrong 10 times.");
+alert("Sorry","You failed the game. Your number was "+guess);
 exit();
 }
 if(!text.is_alphanumeric()) speak("No number.");
 int guess=parse_float(text);
 if (guess<1 or guess > 100) speak("Number must be between 1 and 100");
 else if (guess<num) {
-speak("To low");
+speak("Sorry, but that number is too low.");
 tries+=1;
 }
 else if (guess>num) {
-speak("To high");
+speak("That is a high number.");
 tries+=1;
 }
 else if (guess==num) {
-alert("success", "you did it");
+alert("success", "You've won the game.");
 exit();
 }
 }
