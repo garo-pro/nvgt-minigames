@@ -2,3 +2,5 @@
 * text=auto
 *.nvgt linguist-language=angelScript linguist-detectable=true linguist-vendored=false linguist-generated=false linguist-documentation=false
 *.html linguist-detectable=true linguist-vendored=false linguist-generated=false linguist-documentation=false
+*.md linguist-detectable=true linguist-vendored=false linguist-generated=false linguist-documentation=false
+*.txt linguist-detectable=true linguist-vendored=false linguist-generated=false linguist-documentation=false

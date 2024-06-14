@@ -27,11 +27,12 @@ f.reset();
 f.create_window((what==""?"Select document to view":"Reading, "+what));
 wait(250);
 // Waits 250 milliseconds (1/4 seconds) so to give the screenreader enough time to speak the window title.
-int l=f.create_list("Documentations");
+int l=f.create_list("&Documentations");
 for(uint i=0;i<docs.length();i++)
 {
 f.add_list_item(l,docs[i],docs[i]);
 }
+f.set_list_position(l,f.get_list_index_by_id(l,what));
 int read=-1;
 if(what!="") read=f.create_input_box("&Text",get_file_contents("documentation/"+what+".txt"),"",0,true,true,false);
 int open=f.create_button("&Open the selected document",true,false);
@@ -43,8 +44,16 @@ wait(5);
 f.monitor();
 if(f.is_pressed(open))
 {
-view_doc(f.get_list_item_id(l,f.get_list_position(l)));
+string doc=f.get_list_item_id(l,f.get_list_position(l));
+if(what==doc)
+{
+speak("You are already reading this!");
+}
+else
+{
+view_doc(doc);
 break;
+}
 }
 else if(f.is_pressed(e1))
 {
