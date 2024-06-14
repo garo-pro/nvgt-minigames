@@ -1,0 +1,12 @@
+Number sort
+Welcome to Number Sort.
+
+In this game, you must sort a list of numbers within whatever timeframe you set. The game is completely customizable, so that means you can change any aspect of the game to be what you want.
+When you select start game, you are given a menu where you can select if you'd like to sort numbers from least to greatest or greatest to least. Select based on your preference.
+After you've selected that, you are given several input boxes that will help you customize your gameplay. When you have entered all the required info, the game will start.
+
+Press the left and right arrows to move through your numbers. Press space to pick up or put down a number.
+Press t to see how much time you have left.
+Finally, press escape to cancel the game.
+
+Enjoy!

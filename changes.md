@@ -1,3 +1,4 @@
+Documentation for number sort has been added.
 Guess the number now uses form dialogs.
 Documentation updated. Index updated to let it look not that ugly at start, and a documentation documentation added.
 When the button d12 which closes the document reader is pressed after a document has been read, which is forcefully the case when an user wants to exit the documentation viewer, the form now resets before exiting. This don'T really needs to be done, but still.
