@@ -15,19 +15,20 @@ while(true)
 {
 wait(5);
 form.monitor();
-string text=form.get_text(a);
 if(form.is_pressed(x)) exit();
 if(form.is_pressed(guess_it))
 {
+string text=form.get_text(a);
 form.edit_text(a,"",0,0);
 if(tries>=10)
 {
-alert("Sorry","You failed the game. Your number was "+guess);
+alert("Sorry","You failed the game. the correct number was "+num);
 exit();
 }
-if(!text.is_alphanumeric()) speak("No number.");
+
 guess=parse_int(text);
-if (guess<1 or guess > 100) speak("Number must be between 1 and 100");
+if(!text.is_alphanumeric()) speak("No number.");
+else if (guess<1 or guess > 100) speak("Number must be between 1 and 100");
 else if (guess<num) {
 speak("Sorry, but that number is too low.");
 tries+=1;
