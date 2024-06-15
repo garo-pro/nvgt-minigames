@@ -1,4 +1,6 @@
-Finally! We have a launcher.
+New in build 1:
+The readme has been updated. Aria2c was, and probably won't be, needed.
+Finally! We have a launcher. Currently it is broken though.
 The documentation viewer no longer imports speech.nvgt doubled.
 Two developers added in the readme.
 Guess the number game has been moved into an extra folder.
