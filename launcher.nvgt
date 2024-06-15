@@ -1,0 +1,117 @@
+// The actual launcher of this project. Written by Garo at the 15th june 2024 and last updated by Garo at the 15th june 2024. Thanks to Harry Min Khant for the custom menu include as well as examples and sounds.
+#include"form.nvgt"
+#include"includes/*.nvgt"
+audio_form f;
+custom_menu m;
+int time;
+string d_log="Debug log started. "+TIME_HOUR+":"+TIME_MINUTE+":"+TIME_second+".\r\n";
+bool debugging=false;
+bool exe=false;
+void main()
+{
+if(debugging==true) d_log+="Starting. "+get_time_stuff+".\r\n";
+if(SCRIPT_IS_COMPILED)
+{
+exe=true;
+if(debugging==true) d_log+="Script is running on exe. "+get_time_stuff+".\r\n";
+}
+else
+{
+if(exe==true) exe=false;
+if(debugging==true) d_log+="Script is running from source. "+get_time_stuff+".\r\n";
+}
+if(debugging==true) d_log+="Startup completed. Loading menu... "+get_time_stuff+".\r\n";
+mainmenu();
+}
+void mainmenu()
+{
+m.reset(true);
+m.clicksound="sounds/menuclick.ogg";
+m.movesound="sounds/menumove.ogg";
+m.opensound="sounds/menuopen.ogg";
+m.wrapsound="sounds/menuwrap.ogg";
+m.edgesound="sounds/menuedge.ogg";
+m.add("Run the blackjack game.","blackjack");
+m.add("Run the guess the number game.","guessthenumber");
+m.add("Run the number sort game.","numbersort");
+m.add("Take a look at the documentation","documentation");
+m.add("Visit the repository online","repository");
+if(debugging==true) m.add("Get the debug log.","debug");
+m.add("Exit","exit");
+m.create("Main menu");
+if(debugging==true) d_log+="Menu successfully loaded. "+get_time_stuff+".\r\n";
+while(m.running)
+{
+wait(5);
+m.monitor();
+if(m.is_pressed("blackjack"))
+{
+speak("Launching blackjack...");
+if(exe==true) run("blackjack/src/bj.exe","",false,false);
+else run("blackjack/src/bj.nvgt","",false,false);
+if(debugging==true) d_log+="Blackjack executed. "+get_time_stuff+".\r\n";
+}
+if(m.is_pressed("guessthenumber");
+{
+speak("Launching guess the number...");
+if(exe==true) run("guess_the_number/guess_the_number.exe","",false,false);
+else run("guess_the_number/guess_the_number.nvgt","",false,false);
+if(debugging==true) d_log+="Guess the number executed. "+get_time_stuff+".\r\n";
+}
+if(m.is_pressed("numbersort"))
+{
+speak("Launching number sort...");
+if(exe==true) run("number_sort/game.exe","",false,false);
+else run("number_sort/game.nvgt","",false,false);
+if(debugging==true) d_log+="Number sort executed. "+get_time_stuff+".\r\n";
+}
+if(m.is_pressed("documentation"))
+{
+speak("Launching the documentation viewer...");
+if(exe==true) run("documentation.exe","",false,false);
+else run("documentation.nvgt","",false,false);
+if(debugging==true) d_log+="Documentation viewer started. "+get_time_stuff+".\r\n";
+}
+if(m.is_pressed("repository"))
+{
+speak("Loading...");
+urlopen("https://github.com/garo-pro/nvgt-minigames/");
+if(debugging==true) d_log+="URL https://github.com/garo-pro/nvgt-minigames/ loaded. "+get_time_stuff+".\r\n";
+}
+if(m.is_pressed("debug"))
+{
+dlg("Press enter to view the debug log.");
+speak("Viewing debug log...");
+if(debugging==true) d_log+="Viewing debug log... "+get_time_stuff+".\r\n";
+debugmenu();
+}
+if(m.is_pressed("exit"))
+{
+speak("Thank you for using");
+if(debugging==true)
+{
+clipboard_set_text(d_log);
+alert("Information","Debug log copied to clipboard.");
+}
+exit();
+}
+}
+}
+void debugmenu()
+{
+f.reset();
+f.create_window("Debug log viewer");
+int debug_log=f.create_input_box("Debug log.",d_log,"",0,true,true,true);
+wait(1000);
+f.focus(debug_log);
+int close=f.create_button("Close");
+while(true)
+{
+wait(5);
+if(f.is_pressed(close))
+{
+f.reset();
+mainmenu();
+}
+}
+}

@@ -1,0 +1,4 @@
+int get_time_stuff()
+{
+time=TIME_HOUR+":"+TIME_MINUTE+":"+TIME_SECOND;
+}
