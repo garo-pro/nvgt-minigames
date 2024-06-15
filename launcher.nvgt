@@ -3,24 +3,25 @@
 #include"includes/*.nvgt"
 audio_form f;
 custom_menu m;
-int time;
-string d_log="Debug log started. "+TIME_HOUR+":"+TIME_MINUTE+":"+TIME_second+".\r\n";
-bool debugging=false;
+string time;
+string d_log="Debug log started. "+TIME_HOUR+":"+TIME_MINUTE+":"+TIME_SECOND+".\r\n";
+bool debugging=true;
 bool exe=false;
 void main()
 {
-if(debugging==true) d_log+="Starting. "+get_time_stuff+".\r\n";
-if(SCRIPT_IS_COMPILED)
+if(debugging) d_log+="Starting. "+get_time_stuff()+".\r\n";
+if(SCRIPT_COMPILED)
 {
 exe=true;
-if(debugging==true) d_log+="Script is running on exe. "+get_time_stuff+".\r\n";
+if(debugging==true) d_log+="Script is running on exe. "+get_time_stuff()+".\r\n";
 }
 else
 {
 if(exe==true) exe=false;
-if(debugging==true) d_log+="Script is running from source. "+get_time_stuff+".\r\n";
+if(debugging==true) d_log+="Script is running from source. "+get_time_stuff()+".\r\n";
 }
-if(debugging==true) d_log+="Startup completed. Loading menu... "+get_time_stuff+".\r\n";
+if(debugging==true) d_log+="Startup completed. Loading menu... "+get_time_stuff()+".\r\n";
+show_window("Launcher");
 mainmenu();
 }
 void mainmenu()
@@ -39,54 +40,58 @@ m.add("Visit the repository online","repository");
 if(debugging==true) m.add("Get the debug log.","debug");
 m.add("Exit","exit");
 m.create("Main menu");
-if(debugging==true) d_log+="Menu successfully loaded. "+get_time_stuff+".\r\n";
+if(debugging==true) d_log+="Menu successfully loaded. "+get_time_stuff()+".\r\n";
 while(m.running)
 {
 wait(5);
 m.monitor();
-if(m.is_pressed("blackjack"))
+if(m.is_clicked("blackjack"))
 {
 speak("Launching blackjack...");
 if(exe==true) run("blackjack/src/bj.exe","",false,false);
 else run("blackjack/src/bj.nvgt","",false,false);
-if(debugging==true) d_log+="Blackjack executed. "+get_time_stuff+".\r\n";
+if(debugging==true) d_log+="Blackjack executed. "+get_time_stuff()+".\r\n";
 }
-if(m.is_pressed("guessthenumber");
+if(m.is_clicked("guessthenumber"))
 {
 speak("Launching guess the number...");
 if(exe==true) run("guess_the_number/guess_the_number.exe","",false,false);
 else run("guess_the_number/guess_the_number.nvgt","",false,false);
-if(debugging==true) d_log+="Guess the number executed. "+get_time_stuff+".\r\n";
+if(debugging==true) d_log+="Guess the number executed. "+get_time_stuff()+".\r\n";
 }
-if(m.is_pressed("numbersort"))
+if(m.is_clicked("numbersort"))
 {
 speak("Launching number sort...");
 if(exe==true) run("number_sort/game.exe","",false,false);
 else run("number_sort/game.nvgt","",false,false);
-if(debugging==true) d_log+="Number sort executed. "+get_time_stuff+".\r\n";
+if(debugging==true) d_log+="Number sort executed. "+get_time_stuff()+".\r\n";
 }
-if(m.is_pressed("documentation"))
+if(m.is_clicked("documentation"))
 {
 speak("Launching the documentation viewer...");
 if(exe==true) run("documentation.exe","",false,false);
 else run("documentation.nvgt","",false,false);
-if(debugging==true) d_log+="Documentation viewer started. "+get_time_stuff+".\r\n";
+if(debugging==true) d_log+="Documentation viewer started. "+get_time_stuff()+".\r\n";
 }
-if(m.is_pressed("repository"))
+if(m.is_clicked("repository"))
 {
 speak("Loading...");
 urlopen("https://github.com/garo-pro/nvgt-minigames/");
-if(debugging==true) d_log+="URL https://github.com/garo-pro/nvgt-minigames/ loaded. "+get_time_stuff+".\r\n";
+if(debugging==true) d_log+="URL https://github.com/garo-pro/nvgt-minigames/ loaded. "+get_time_stuff()+".\r\n";
 }
-if(m.is_pressed("debug"))
+if(m.is_clicked("debug"))
 {
+m.reset();
 dlg("Press enter to view the debug log.");
 speak("Viewing debug log...");
-if(debugging==true) d_log+="Viewing debug log... "+get_time_stuff+".\r\n";
+if(debugging==true) d_log+="Viewing debug log... "+get_time_stuff()+".\r\n";
 debugmenu();
 }
-if(m.is_pressed("exit"))
+if(m.is_clicked("exit"))
 {
+break;
+}
+}
 speak("Thank you for using");
 if(debugging==true)
 {
@@ -95,19 +100,18 @@ alert("Information","Debug log copied to clipboard.");
 }
 exit();
 }
-}
-}
 void debugmenu()
 {
 f.reset();
-f.create_window("Debug log viewer");
+f.create_window("Debug log viewer",false);
+wait(250);
 int debug_log=f.create_input_box("Debug log.",d_log,"",0,true,true,true);
-wait(1000);
 f.focus(debug_log);
-int close=f.create_button("Close");
+int close=f.create_button("Close",false,true);
 while(true)
 {
 wait(5);
+f.monitor();
 if(f.is_pressed(close))
 {
 f.reset();

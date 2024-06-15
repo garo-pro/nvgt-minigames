@@ -1,4 +1,4 @@
-int get_time_stuff()
+string get_time_stuff()
 {
-time=TIME_HOUR+":"+TIME_MINUTE+":"+TIME_SECOND;
+return TIME_HOUR+":"+TIME_MINUTE+":"+TIME_SECOND;
 }
