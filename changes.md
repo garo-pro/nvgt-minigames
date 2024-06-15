@@ -1,3 +1,6 @@
+Finally! We have a launcher.
+The documentation viewer no longer imports speech.nvgt doubled.
+Two developers added in the readme.
 Guess the number game has been moved into an extra folder.
 Documentation for number sort has been added.
 Guess the number now uses form dialogs.
