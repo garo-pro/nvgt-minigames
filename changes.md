@@ -1,3 +1,5 @@
+New in build 2:
+
 New in build 1:
 The readme has been updated. Aria2c was, and probably won't be, needed.
 Finally! We have a launcher. Currently it is broken though.
