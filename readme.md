@@ -3,9 +3,9 @@ Welcome to NVGT Minigames, an ever-growing collection of small timewaster games 
 Additionally, this collection is open sourced, which means that anyone who wants to add a new game or fix errors in the project can do so, and anyone who wants to learn how any of the games work can look at their source code freely.
 ## Documentation
 To view the documentation, you can either read it in your text editor of choice, or you can view the documentation from the documentation viewer in the root directory.
-## The process of building
-### Step 1: Download NVGT
-The first thing you have to download is NVGT, odviously you need it to be able to build the games.
+## Building
+### Downloading NVGT
+To be able to build the games, you must download NVGT.
 To download, click this link:
 (https://nvgt.gg/downloads/)
 Be sure to download the latest version, which at the time of this writing is version 0.86.0.
@@ -13,8 +13,7 @@ After you'Ve downloaded NVGT, you can compile the script.
 - Go to the context menu when you'Ve selected the main script.
 - Press right arrow or enter on the compile submenu.
 - Press r to go to the release option, and press enter.
-If the compilation process succeeded, a message box will appear, telling you that the executable was saved. But you still have one more thing left before you're done.
-
+If the compilation process succeeded, a message box will appear, telling you that the executable was saved.
 ## Contributors:
 - [Garo](https://github.com/garo-pro): Creator, main developer.
 - [Parker](https://github.com/parker13435): Developer.

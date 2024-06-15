@@ -1,5 +1,6 @@
 #include"form.nvgt"
 int tries=1;
+int guess=0;
 audio_form form;
 void main() {
 show_window("guess the number");
@@ -25,7 +26,7 @@ alert("Sorry","You failed the game. Your number was "+guess);
 exit();
 }
 if(!text.is_alphanumeric()) speak("No number.");
-int guess=parse_float(text);
+guess=parse_int(text);
 if (guess<1 or guess > 100) speak("Number must be between 1 and 100");
 else if (guess<num) {
 speak("Sorry, but that number is too low.");
