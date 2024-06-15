@@ -1,3 +1,4 @@
+Guess the number game has been moved into an extra folder.
 Documentation for number sort has been added.
 Guess the number now uses form dialogs.
 Documentation updated. Index updated to let it look not that ugly at start, and a documentation documentation added.
