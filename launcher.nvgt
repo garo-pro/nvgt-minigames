@@ -7,8 +7,14 @@ string time;
 string d_log="Debug log started. "+TIME_HOUR+":"+TIME_MINUTE+":"+TIME_SECOND+".\r\n";
 bool debugging=true;
 bool exe=false;
+scriptprogram@[] programs(0);
+script_detect scripting;
 void main()
 {
+add_program("Blackjack","blackjack/source/bj");
+add_program("Guess The Number","guess_the_number/guess_the_number");
+add_program("Number Sort","number_sort/game");
+add_program("Documentation","documentation");
 if(debugging) d_log+="Starting. "+get_time_stuff()+".\r\n";
 if(SCRIPT_COMPILED)
 {
@@ -32,10 +38,10 @@ m.movesound="sounds/menumove.ogg";
 m.opensound="sounds/menuopen.ogg";
 m.wrapsound="sounds/menuwrap.ogg";
 m.edgesound="sounds/menuedge.ogg";
-m.add("Run the blackjack game.","blackjack");
-m.add("Run the guess the number game.","guessthenumber");
-m.add("Run the number sort game.","numbersort");
-m.add("Take a look at the documentation","documentation");
+for(uint i=0;i<programs.length();i++)
+{
+m.add("Run "+programs[i].name,programs[i].name);
+}
 m.add("Visit the repository online","repository");
 if(debugging==true) m.add("Get the debug log.","debug");
 m.add("Exit","exit");
@@ -45,41 +51,25 @@ while(m.running)
 {
 wait(5);
 m.monitor();
-if(m.is_clicked("blackjack"))
+string r=m.click;
+if(r!="" && get_program_index(r)>-1)
 {
-speak("Launching blackjack...");
-if(exe==true) run("blackjack/src/bj.exe","",false,false);
-else run("blackjack/src/bj.nvgt","",false,false);
-if(debugging==true) d_log+="Blackjack executed. "+get_time_stuff()+".\r\n";
+int index=get_program_index(r);
+string final_name=programs[index].value+"."+(exe?"exe":"nvgt");
+scripting.name=final_name;
+bool suc=scripting.execute();
+string sucmsg=(suc?programs[index].name+" has been executed.":"Failed to execute"+programs[index].name);
+speak(sucmsg);
+if(debugging) d_log+=sucmsg+". "+get_time_stuff()+".\r\n";
+break;
 }
-if(m.is_clicked("guessthenumber"))
-{
-speak("Launching guess the number...");
-if(exe==true) run("guess_the_number/guess_the_number.exe","",false,false);
-else run("guess_the_number/guess_the_number.nvgt","",false,false);
-if(debugging==true) d_log+="Guess the number executed. "+get_time_stuff()+".\r\n";
-}
-if(m.is_clicked("numbersort"))
-{
-speak("Launching number sort...");
-if(exe==true) run("number_sort/game.exe","",false,false);
-else run("number_sort/game.nvgt","",false,false);
-if(debugging==true) d_log+="Number sort executed. "+get_time_stuff()+".\r\n";
-}
-if(m.is_clicked("documentation"))
-{
-speak("Launching the documentation viewer...");
-if(exe==true) run("documentation.exe","",false,false);
-else run("documentation.nvgt","",false,false);
-if(debugging==true) d_log+="Documentation viewer started. "+get_time_stuff()+".\r\n";
-}
-if(m.is_clicked("repository"))
+else if(m.is_clicked("repository"))
 {
 speak("Loading...");
 urlopen("https://github.com/garo-pro/nvgt-minigames/");
 if(debugging==true) d_log+="URL https://github.com/garo-pro/nvgt-minigames/ loaded. "+get_time_stuff()+".\r\n";
 }
-if(m.is_clicked("debug"))
+else if(m.is_clicked("debug"))
 {
 m.reset();
 dlg("Press enter to view the debug log.");
@@ -87,7 +77,7 @@ speak("Viewing debug log...");
 if(debugging==true) d_log+="Viewing debug log... "+get_time_stuff()+".\r\n";
 debugmenu();
 }
-if(m.is_clicked("exit"))
+else if(m.is_clicked("exit"))
 {
 break;
 }
@@ -118,4 +108,27 @@ f.reset();
 mainmenu();
 }
 }
+}
+class scriptprogram
+{
+string name, value;
+scriptprogram(string name1, string value2)
+{
+this.name=name1;
+this.value=value2;
+}
+}
+void add_program(string name, string value)
+{
+scriptprogram s1(name, value);
+programs.insert_last(s1);
+}
+int get_program_index(string name)
+{
+if(programs.length()<1) return -1;
+for(uint i=0;i<programs.length();i++)
+{
+if(programs[i].name==name) return i;
+}
+return -1;
 }

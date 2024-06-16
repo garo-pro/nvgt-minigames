@@ -1,10 +1,9 @@
-#pragma include includes
-#include"dlg.nvgt"
+#include"includes/dialog.nvgt"
 #include"speech.nvgt"
 #include"sound_pool.nvgt"
-#include"basicmenu.nvgt"
-#include"readable_time.nvgt"
-#include"numbox.nvgt"
+#include"includes/basicmenu.nvgt"
+#include"includes/readable_time.nvgt"
+#include"includes/numbox.nvgt"
 int[] numbers;
 int[] sorted_numbers;
 int num_index=0;

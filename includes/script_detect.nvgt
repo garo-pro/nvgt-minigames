@@ -1,0 +1,38 @@
+/*
+script_detect
+
+This class allows you to detect a script, .EXE, or .NVGT, to run without writing complex code.
+This class automatically determines whether to run directly or run from nvgt script which is installed at your computer.
+*/
+class script_detect
+{
+private string mname;
+script_detect()
+{
+this.mname="";
+}
+script_detect(string mn)
+{
+this.mname=mn;
+}
+string get_name() property
+{
+if(this.mname=="") return"";
+if(this.mname.ends_with(".nvgt")) return SCRIPT_EXECUTABLE;
+return this.mname;
+}
+void set_name(string value) property
+{
+this.mname=value;
+}
+string get_command() property
+{
+if(this.mname=="") return"";
+if(this.mname.ends_with(".nvgt")) return this.mname;
+return"";
+}
+bool execute(bool wait_complete=false, bool background=false)
+{
+return ::run(this.name, this.command, wait_complete, background);
+}
+}
