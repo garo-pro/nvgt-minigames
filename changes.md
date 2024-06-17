@@ -1,5 +1,7 @@
 New in build 2:
-
+NVGT in the readme updated from version 0.86.0 to 0.87.2. You can expect a new windows release in the next week.
+The launcher has been documented in the readme.md file and will soon be documented as documentation within the documentation viewer.
+Once again the todo has been emptied.
 New in build 1:
 The readme has been updated. Aria2c was, and probably won't be, needed.
 Finally! We have a launcher. Currently it is broken though.
