@@ -11,10 +11,10 @@ scriptprogram@[] programs(0);
 script_detect scripting;
 void main()
 {
-add_program("Blackjack","blackjack/source/bj");
-add_program("Guess The Number","guess_the_number/guess_the_number");
-add_program("Number Sort","number_sort/game");
-add_program("Documentation","documentation");
+add_program("Blackjack","blackjack/source","bj");
+add_program("Guess The Number","guess_the_number","guess_the_number");
+add_program("Number Sort","number_sort","game");
+add_program("Documentation","","documentation");
 if(debugging) d_log+="Starting. "+get_time_stuff()+".\r\n";
 if(SCRIPT_COMPILED)
 {
@@ -54,14 +54,16 @@ m.monitor();
 string r=m.click;
 if(r!="" && get_program_index(r)>-1)
 {
+string current=cwdir();
 int index=get_program_index(r);
 string final_name=programs[index].value+"."+(exe?"exe":"nvgt");
+if(programs[index].path!="") chdir(programs[index].path);
 scripting.name=final_name;
 bool suc=scripting.execute();
 string sucmsg=(suc?programs[index].name+" has been executed.":"Failed to execute"+programs[index].name);
 speak(sucmsg);
 if(debugging) d_log+=sucmsg+". "+get_time_stuff()+".\r\n";
-break;
+chdir(current);
 }
 else if(m.is_clicked("repository"))
 {
@@ -111,16 +113,17 @@ mainmenu();
 }
 class scriptprogram
 {
-string name, value;
-scriptprogram(string name1, string value2)
+string name, value, path;
+scriptprogram(string name1, string dir, string value2)
 {
 this.name=name1;
+this.path=dir;
 this.value=value2;
 }
 }
-void add_program(string name, string value)
+void add_program(string name, string path, string value)
 {
-scriptprogram s1(name, value);
+scriptprogram s1(name, path, value);
 programs.insert_last(s1);
 }
 int get_program_index(string name)
