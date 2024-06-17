@@ -86,7 +86,7 @@ speak("Thank you for using");
 if(debugging==true)
 {
 clipboard_set_text(d_log);
-alert("Information","Debug log copied to clipboard.");
+speak("Information! Debug log copied to clipboard.");
 }
 exit();
 }

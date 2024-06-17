@@ -6,8 +6,7 @@ To view the documentation, you can either read it in your text editor of choice,
 ## Building
 ### Downloading NVGT
 To be able to build the games, you must download NVGT.
-To download, click this link:
-(https://nvgt.gg/downloads/)
+To download, click [this link](https://nvgt.gg/downloads/)
 Be sure to download the latest version, which at the time of this writing is version 0.86.0.
 After you'Ve downloaded NVGT, you can compile the script.
 - Go to the context menu when you'Ve selected the main script.
@@ -17,7 +16,8 @@ If the compilation process succeeded, a message box will appear, telling you tha
 ## Contributors:
 - [Garo](https://github.com/garo-pro): Creator, main developer.
 - [Parker](https://github.com/parker13435): Developer.
-- [Jonathan Schuster](https://github.com/jonathans859)
+- [Jonathan Schuster](https://github.com/jonathans859): Developer.
 - [Tew Hong Jun](https://github.com/hongjuntew)
+- [Harry Min Khant](https://github.com/harrymkt9: Developer.
 
 --- End of readme file ---
