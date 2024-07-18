@@ -23,6 +23,6 @@ If the compilation process succeeded, a message box will appear, telling you tha
 - [Parker](https://github.com/parker13435): Developer.
 - [Jonathan Schuster](https://github.com/jonathans859): Developer.
 - [Tew Hong Jun](https://github.com/hongjuntew)
-- [Harry Min Khant](https://github.com/harrymkt9: Developer.
+- [Harry Min Khant](https://github.com/harrymkt): Developer.
 
 --- End of readme file ---
