@@ -100,7 +100,7 @@ wait(250);
 int debug_log=f.create_input_box("Debug log.",d_log,"",0,true,true,true);
 f.focus(debug_log);
 int close=f.create_button("&close",false,true);
-f.set_default_controls(close,close)
+f.set_default_controls(close,close);
 while(true)
 {
 wait(5);
