@@ -5,17 +5,17 @@ audio_form f;
 custom_menu m;
 string time;
 string d_log="Debug log started. "+TIME_HOUR+":"+TIME_MINUTE+":"+TIME_SECOND+".\r\n";
-bool debugging=true;
+bool debugging=false;
 bool exe=false;
 scriptprogram@[] programs(0);
 script_detect scripting;
 void main()
 {
+if(debugging) d_log+="Starting. "+get_time_stuff()+".\r\n";
 add_program("Blackjack","blackjack/source","bj");
 add_program("Guess The Number","guess_the_number","guess_the_number");
 add_program("Number Sort","number_sort","game");
 add_program("Documentation","","documentation");
-if(debugging) d_log+="Starting. "+get_time_stuff()+".\r\n";
 if(SCRIPT_COMPILED)
 {
 exe=true;
@@ -99,7 +99,8 @@ f.create_window("Debug log viewer",false);
 wait(250);
 int debug_log=f.create_input_box("Debug log.",d_log,"",0,true,true,true);
 f.focus(debug_log);
-int close=f.create_button("Close",false,true);
+int close=f.create_button("&close",false,true);
+f.set_default_controls(close,close)
 while(true)
 {
 wait(5);
