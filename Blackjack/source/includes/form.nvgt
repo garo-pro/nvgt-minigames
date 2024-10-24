@@ -57,7 +57,8 @@ enum control_types {
 	ct_list,
 	ct_slider,
 	ct_form,
-	ct_keyboard_area
+	ct_keyboard_area,
+	ct_link
 }
 //form_errors
 enum audioform_errorcodes {
@@ -99,7 +100,7 @@ enum control_event_type {
 	event_slider
 }
 //characters that should be considered word boundaries.
-string audioform_word_seperators = "_ .,!\\\"/[{()}]=\n";
+string audioform_word_separators = "_ .,!\\\"/[{()}]=\n";
 //prespeech callback, if set the given function will be called right before the form speaks.
 funcdef void prespeech_callback(audio_form@ f);
 //control event callback
@@ -107,7 +108,7 @@ funcdef int on_control_event_callback(audio_form@ f, int c, control_event_type e
 
 //can make this a member of the audio form class as soon as even one person suggests seriously wanting to change on a form by form basis I guess
 bool audioform_input_disable_ralt = true;
-
+int audioform_keyboard_echo = textflag_characters;
 //main window class
 class audio_form {
 	bool active;
@@ -168,6 +169,52 @@ class audio_form {
 		}
 		c_form[control_index].checked = checked;
 		return true;
+	}
+	bool set_custom_type(int control_index, string custom_type)
+		{
+		form_error = 0;
+		if (!active) {
+			form_error = form_error_no_window;
+			return false;
+		}
+		if ((control_index < 0) || (control_index > c_form.length() - 1)) {
+			form_error = form_error_invalid_control;
+			return false;
+		}
+		if (!c_form[control_index].active) {
+			form_error = form_error_invalid_control;
+			return false;
+		}
+		if (custom_type.empty()) {
+			form_error = form_error_invalid_value;
+			return false;
+		}
+		c_form[control_index].custom_type = custom_type;
+		return true;
+	}
+	string get_custom_type(int control_index) {
+		form_error = 0;
+		if (!active) {
+			form_error = form_error_no_window;
+			return "";
+		}
+		if ((control_index < 0) || (control_index > c_form.length() - 1)) {
+			form_error = form_error_invalid_index;
+			return "";
+		}
+		return c_form[control_index].custom_type;
+	}
+	bool has_custom_type(int control_index) {
+		form_error = 0;
+		if (!active) {
+			form_error = form_error_no_window;
+			return false;
+		}
+		if ((control_index < 0) || (control_index > c_form.length() - 1)) {
+			form_error = form_error_invalid_index;
+			return false;
+		}
+		return !c_form[control_index].custom_type.empty();
 	}
 	bool set_subform(int control_index, audio_form@ f) {
 		form_error = 0;
@@ -264,6 +311,30 @@ class audio_form {
 		@c_form[control_counter].ui_speech = ui_speech;
 		return control_counter;
 	}
+	int create_tab_panel(string caption, int maximum_items = 0, bool repeat_boundary_items = false) {
+		form_error = 0;
+		if (active_controls >= 50) {
+			form_error = form_error_window_full;
+			return -1;
+		}
+		control_counter++;
+		active_controls++;
+		c_form.resize(control_counter + 1);
+		c_form[control_counter].type = ct_list;
+		@c_form[control_counter].event_callback = event_callback;
+		c_form[control_counter].hotkey = shortcut(caption);
+		c_form[control_counter].hotkey_letter = shortcut_letter(caption);
+		c_form[control_counter].caption = caption.replace("&", "", true);
+		c_form[control_counter].visible = true;
+		c_form[control_counter].enabled = true;
+		c_form[control_counter].max_length = maximum_items;
+		c_form[control_counter].list_multiselect = false;
+		c_form[control_counter].list_repeat_boundary_items = repeat_boundary_items;
+		c_form[control_counter].list_is_tab_panel = true;
+		c_form[control_counter].speech_output = speech_output;
+		@c_form[control_counter].ui_speech = ui_speech;
+		return control_counter;
+	}
 	int create_button(string caption, bool primary = false, bool cancel = false, bool overwrite = true) {
 		form_error = 0;
 		if (active_controls >= 50) {
@@ -307,7 +378,7 @@ class audio_form {
 		@c_form[control_counter].ui_speech = ui_speech;
 		return control_counter;
 	}
-	int create_slider(string caption, int default_value = 50, int minimum_value = 0, int maximum_value = 100, string text = "") {
+	int create_slider(string caption, double default_value = 50, double minimum_value = 0, double maximum_value = 100, string text = "", double step_size = 1) {
 		form_error = 0;
 		if (active_controls >= 50) {
 			form_error = form_error_window_full;
@@ -326,6 +397,7 @@ class audio_form {
 		c_form[control_counter].slider_value = default_value;
 		c_form[control_counter].slider_minimum_value = minimum_value;
 		c_form[control_counter].slider_maximum_value = maximum_value;
+		c_form[control_counter].slider_step_size = step_size;
 		c_form[control_counter].text = text;
 		c_form[control_counter].speech_output = speech_output;
 		@c_form[control_counter].ui_speech = ui_speech;
@@ -413,6 +485,27 @@ class audio_form {
 		c_form[control_counter].enabled = true;
 		c_form[control_counter].checked = initial_value;
 		c_form[control_counter].read_only = read_only;
+		c_form[control_counter].speech_output = speech_output;
+		@c_form[control_counter].ui_speech = ui_speech;
+		return control_counter;
+	}
+	int create_link(string caption, string url) {
+		form_error = 0;
+		if (active_controls >= 50) {
+			form_error = form_error_window_full;
+			return -1;
+		}
+		control_counter++;
+		active_controls++;
+		c_form.resize(control_counter + 1);
+		c_form[control_counter].type = ct_link;
+		@c_form[control_counter].event_callback = event_callback;
+		c_form[control_counter].hotkey = shortcut(caption);
+		c_form[control_counter].hotkey_letter = shortcut_letter(caption);
+		c_form[control_counter].caption = caption.replace("&", "", true);
+		c_form[control_counter].link_url = url;
+		c_form[control_counter].visible = true;
+		c_form[control_counter].enabled = true;
 		c_form[control_counter].speech_output = speech_output;
 		@c_form[control_counter].ui_speech = ui_speech;
 		return control_counter;
@@ -570,16 +663,16 @@ class audio_form {
 			}
 			focus(control_focus, true);
 		}
-		if ((cancels > -1) && (key_repeating(KEY_ESCAPE))) {
+		if ((cancels > -1) && (key_repeating(KEY_ESCAPE) || key_released(KEY_AC_BACK))) {
 			stop_speech();
 			c_form[cancels].pressed = true;
 			if (subform)
 				return 2;
 		}
-		if ((focused < 0 || c_form[focused].type != ct_keyboard_area) && (focused < 0 || (c_form[focused].multiline == false) || (c_form[focused].multiline_enter == false && (key_up(KEY_LCTRL)) && (key_up(KEY_RCTRL)) && (key_up(KEY_LSHIFT)) && (key_up(KEY_RSHIFT)))) && ((key_pressed(KEY_RETURN)) || (key_pressed(KEY_NUMPAD_ENTER)) || (autotab == 3))) {
+		if ((focused < 0 || c_form[focused].type != ct_keyboard_area) && (focused < 0 || ((!c_form[focused].multiline_enter || !c_form[focused].multiline) && c_form[focused].type == ct_input || c_form[focused].type == ct_button) && key_up(KEY_LCTRL) && key_up(KEY_RCTRL) && key_up(KEY_LSHIFT) && key_up(KEY_RSHIFT)) && (key_pressed(KEY_RETURN) || key_pressed(KEY_NUMPAD_ENTER) || (autotab == 3))) {
 			stop_speech();
 			if ((defaults == -1) && (focused > -1)) {
-				if (c_form[focused].type == ct_button)
+				if (c_form[focused].type == ct_button || c_form[focused].type == ct_link)
 					c_form[focused].pressed = true;
 				else if (subform)
 					return 3;
@@ -613,6 +706,22 @@ class audio_form {
 	}
 	bool focus_silently(int control_id) {
 		return focus(control_id, false, true);
+	}
+	bool is_disallowed_char(int control_index, string char, bool search_all = true) {
+		form_error = 0;
+		if (!active) {
+			form_error = form_error_no_window;
+			return false;
+		}
+		if ((control_index < 0) || (control_index > c_form.length() - 1)) {
+			form_error = form_error_invalid_index;
+			return false;
+		}
+		if (!c_form[control_index].active) {
+			form_error = form_error_invalid_control;
+			return false;
+		}
+		return c_form[control_index].is_disallowed_char(char, search_all);
 	}
 	bool is_visible(int control_index) {
 		form_error = 0;
@@ -886,6 +995,28 @@ class audio_form {
 		set_cancel(control_index, cancel, overwrite);
 		return true;
 	}
+	bool set_list_propertyes(int control_index, bool multiselect=false, bool repeat_boundary_items=false) {
+		form_error = 0;
+		if (!active) {
+			form_error = form_error_no_window;
+			return false;
+		}
+		if ((control_index < 0) || (control_index > c_form.length() - 1)) {
+			form_error = form_error_invalid_index;
+			return false;
+		}
+		if (c_form[control_index].type != ct_list) {
+			form_error = form_error_invalid_control;
+			return false;
+		}
+		if (!c_form[control_index].active) {
+			form_error = form_error_invalid_control;
+			return false;
+		}
+		c_form[control_counter].list_multiselect = multiselect;
+		c_form[control_counter].list_repeat_boundary_items = repeat_boundary_items;
+		return true;
+	}
 	bool delete_list_item(int control_index, int list_index, bool reset_cursor = true, bool speak_deletion_status = true) {
 		form_error = 0;
 		if (!active) {
@@ -1015,6 +1146,47 @@ class audio_form {
 		c_form[control_index].visible = visible;
 		return true;
 	}
+	bool set_enable_go_to_index(int control_index, bool enabled) {
+		form_error = 0;
+		if (!active) {
+			form_error = form_error_no_window;
+			return false;
+		}
+		if ((control_index < 0) || (control_index > c_form.length() - 1)) {
+			form_error = form_error_invalid_control;
+			return false;
+		}
+		if (!c_form[control_index].active) {
+			form_error = form_error_invalid_control;
+			return false;
+		}
+		c_form[control_index].enable_go_to_index = enabled;
+		return true;
+	}
+	bool set_disallowed_chars(int control_index, string chars, bool use_only_disallowed_chars = false, string char_disallowed_description = "") {
+		form_error = 0;
+		if (!active) {
+			form_error = form_error_no_window;
+			return false;
+		}
+		if ((control_index < 0) || (control_index > c_form.length() - 1)) {
+			form_error = form_error_invalid_control;
+			return false;
+		}
+		if (!c_form[control_index].active) {
+			form_error = form_error_invalid_control;
+			return false;
+		}
+		if (chars.length() < 1)
+			c_form[control_index].disallowed_chars.resize(0);
+		else {
+			for (uint i = 0; i < chars.length(); i++)
+				c_form[control_index].disallowed_chars.insert_last(chars[i]);
+		}
+		c_form[control_index].use_only_disallowed_chars = use_only_disallowed_chars;
+		c_form[control_index].char_disallowed_description = char_disallowed_description;
+		return true;
+	}
 	bool set_overwrite_mode(int control_index, bool overwrite) {
 		form_error = 0;
 		if (!active) {
@@ -1109,7 +1281,7 @@ class audio_form {
 		c_form[control_index].list_nav_translate = nav_translate;
 		return true;
 	}
-	int[] get_list_selections(int control_index) {
+	int[]@ get_list_selections(int control_index) {
 		int[] temp;
 		int position;
 		form_error = 0;
@@ -1142,6 +1314,63 @@ class audio_form {
 		}
 		if ((temp.length() == 0) && (position > -1))
 			temp.insert_last(position);
+		return temp;
+	}
+	bool is_list_item_checked(int control_index, int item_index) {
+		form_error = 0;
+		if (!active) {
+			form_error = form_error_no_window;
+			return false;
+		}
+		if ((control_index < 0) || (control_index > c_form.length() - 1)) {
+			form_error = form_error_invalid_index;
+			return false;
+		}
+		if (c_form[control_index].type != ct_list) {
+			form_error = form_error_invalid_control;
+			return false;
+		}
+		if (item_index > c_form[control_index].list_length) {
+			form_error = form_error_invalid_list_index;
+			return false;
+		}
+		if (!c_form[control_index].active) {
+			form_error = form_error_invalid_control;
+			return false;
+		}
+		if (!c_form[control_index].list_multiselect) {
+			form_error = form_error_invalid_control;
+			return false;
+		}
+		return c_form[control_index].list[item_index].checked;
+	}
+	int[]@ get_checked_list_items(int control_index) {
+		int[] temp;
+		form_error = 0;
+		if (!active) {
+			form_error = form_error_no_window;
+			return temp;
+		}
+		if ((control_index < 0) || (control_index > c_form.length() - 1)) {
+			form_error = form_error_invalid_index;
+			return temp;
+		}
+		if (c_form[control_index].type != ct_list) {
+			form_error = form_error_invalid_control;
+			return temp;
+		}
+		if (!c_form[control_index].active) {
+			form_error = form_error_invalid_control;
+			return temp;
+		}
+		if (!c_form[control_index].list_multiselect) {
+			form_error = form_error_invalid_control;
+			return temp;
+		}
+		for (int counter = 0; counter <= c_form[control_index].list_length; counter++) {
+			if (c_form[control_index].list[counter].checked)
+				temp.insert_last(counter);
+		}
 		return temp;
 	}
 	int get_list_count(int control_index) {
@@ -1600,6 +1829,39 @@ class audio_form {
 	int get_last_error() {
 		return form_error;
 	}
+	bool set_link_url(int control_index, string new_url) {
+		form_error = 0;
+		if (!active) {
+			form_error = form_error_no_window;
+			return false;
+		}
+		if ((control_index < 0) || (control_index > c_form.length() - 1)) {
+			form_error = form_error_invalid_index;
+			return false;
+		}
+		if (c_form[control_index].type != ct_link) {
+			form_error = form_error_invalid_control;
+			return false;
+		}
+		c_form[control_index].link_url = new_url;
+		return true;
+	}
+	string get_link_url(int control_index) {
+		form_error = 0;
+		if (!active) {
+			form_error = form_error_no_window;
+			return "";
+		}
+		if ((control_index < 0) || (control_index > c_form.length() - 1)) {
+			form_error = form_error_invalid_index;
+			return "";
+		}
+		if (c_form[control_index].type != ct_link) {
+			form_error = form_error_invalid_control;
+			return "";
+		}
+		return c_form[control_index].link_url;
+	}
 	bool set_progress(int control_index, int value) {
 		form_error = 0;
 		if (!active) {
@@ -1633,7 +1895,7 @@ class audio_form {
 		}
 		return true;
 	}
-	bool set_slider(int control_index, int value, int min = -1, int max = -1) {
+	bool set_slider(int control_index, double value, double min = -1, double max = -1) {
 		form_error = 0;
 		if (!active) {
 			form_error = form_error_no_window;
@@ -1666,7 +1928,7 @@ class audio_form {
 		c_form[control_index].slider_value = value;
 		return true;
 	}
-	int get_slider(int control_index) {
+	double get_slider(int control_index) {
 		form_error = 0;
 		if (!active) {
 			form_error = form_error_no_window;
@@ -1682,7 +1944,7 @@ class audio_form {
 		}
 		return c_form[control_index].slider_value;
 	}
-	string get_slider_text_value(int control_index, int value) {
+	string get_slider_text_value(int control_index, double value) {
 		form_error = 0;
 		if (!active) {
 			form_error = form_error_no_window;
@@ -1700,7 +1962,44 @@ class audio_form {
 		if (c_form[control_index].slider_text_values.get(value, text)) return "";
 		return text;
 	}
-	bool set_slider_text_value(int control_index, int value, const string& in text) {
+	bool set_slider_step_size(int control_index, double new_size) {
+		form_error = 0;
+		if (!active) {
+			form_error = form_error_no_window;
+			return false;
+		}
+		if ((control_index < 0) || (control_index > c_form.length() - 1)) {
+			form_error = form_error_invalid_index;
+			return false;
+		}
+		if (c_form[control_index].type != ct_slider) {
+			form_error = form_error_invalid_control;
+			return false;
+		}
+		if (new_size <= 0) {
+			form_error = form_error_invalid_value;
+			return false;
+		}
+		c_form[control_index].slider_step_size = new_size;
+		return true;
+	}
+	double get_slider_step_size(int control_index) {
+		form_error = 0;
+		if (!active) {
+			form_error = form_error_no_window;
+			return -1;
+		}
+		if ((control_index < 0) || (control_index > c_form.length() - 1)) {
+			form_error = form_error_invalid_index;
+			return -1;
+		}
+		if (c_form[control_index].type != ct_slider) {
+			form_error = form_error_invalid_control;
+			return -1;
+		}
+		return c_form[control_index].slider_step_size;
+	}
+	bool set_slider_text_value(int control_index, double value, const string& in text) {
 		form_error = 0;
 		if (!active) {
 			form_error = form_error_no_window;
@@ -1798,8 +2097,9 @@ class audio_form {
 		@ui_speech = @handle;
 		return true;
 	}
-	void reset() {
+	void reset(bool reset_to_default_keyboard_echo = true) {
 		form_error = 0;
+		if (reset_to_default_keyboard_echo) default_echo_flag = audioform_keyboard_echo;
 		active = false;
 		control_focus = -1;
 		control_counter = -1;
@@ -1874,8 +2174,8 @@ class audio_form {
 		return true;
 	}
 	private void check(int tab_index) {
-		if (c_form[tab_index].multiline or c_form[tab_index].type == ct_list) {
-			if (keyboard_modifiers & KEYMOD_CTRL != 0 and key_pressed(KEY_G))
+		if (c_form[tab_index].type == ct_input or c_form[tab_index].type == ct_list) {
+			if (keyboard_modifiers & KEYMOD_CTRL != 0 and key_pressed(KEY_G) and c_form[tab_index].enable_go_to_index)
 				go_to_index(this, tab_index);
 		}
 		if ((c_form[tab_index].type == ct_input && c_form[tab_index].multiline && c_form[tab_index].text != "") or c_form[tab_index].type == ct_list) {
@@ -1887,6 +2187,15 @@ class audio_form {
 					c_form[tab_index].search(last_search, keyboard_modifiers & KEYMOD_SHIFT == 0 ? 1 : -1, false);
 				else
 					search_for(this, tab_index);
+			}
+		}
+		if (c_form[tab_index].type == ct_input) {
+			if (key_repeating(KEY_F2)) {
+				int dir = 1;
+				if (keyboard_modifiers & KEYMOD_SHIFT != 0) dir = -1;
+				audioform_keyboard_echo = audioform_change_keyboard_echo(audioform_keyboard_echo, dir);
+				this.set_default_keyboard_echo(audioform_keyboard_echo);
+				speak(audioform_keyboard_echo_string(audioform_keyboard_echo));
 			}
 		}
 		if (@utility_form == null)
@@ -2066,7 +2375,7 @@ class audio_form {
 	//internal properties
 	bool subform = false;
 	private int speech_output;
-	int default_echo_flag = textflag_characters;
+	int default_echo_flag = audioform_keyboard_echo;
 	private control[] c_form;
 	private int form_error;
 	private int control_counter;
@@ -2079,6 +2388,8 @@ class audio_form {
 class control {
 	string caption;
 	string text;
+	string custom_type;
+	string link_url;
 	string password_mask;
 	string highlight_selection_speech_text;
 	string highlight_unselection_speech_text;
@@ -2088,12 +2399,14 @@ class control {
 	list_item[] list;
 	bool list_multiselect;
 	bool list_repeat_boundary_items;
+	bool list_is_tab_panel;
 	bool list_nav_translate;
 	int type;
 	int progress;
-	int slider_value;
-	int slider_minimum_value;
-	int slider_maximum_value;
+	double slider_value;
+	double slider_minimum_value;
+	double slider_maximum_value;
+	double slider_step_size;
 	dictionary slider_text_values;
 	int echo_flag;
 	int speak_interval;
@@ -2131,6 +2444,10 @@ class control {
 	bool multinav_numbers;
 	tts_voice@ ui_speech;
 	audio_form@ subform = null;
+	string[] disallowed_chars;
+	bool use_only_disallowed_chars;
+	string char_disallowed_description;
+	bool enable_go_to_index; //This is mostly used on go to index field where it prevents the key from pressing again.
 	control() {
 		progress_time.restart();
 		progress_time.pause();
@@ -2178,6 +2495,10 @@ class control {
 		list_position = -1;
 		list_repeat_boundary_items = false;
 		@ui_speech = null;
+		this.disallowed_chars.resize(0);
+		this.use_only_disallowed_chars = false;
+		this.char_disallowed_description = "";
+		this.enable_go_to_index = true;
 	}
 	void focus(bool interrupt_previous_speech, bool separate_attributes, bool silent = false) {
 		if (silent == true) {
@@ -2239,21 +2560,31 @@ class control {
 			speak_progress(false);
 		if (type == ct_slider)
 			speak(slider_value_string(), false);
-		if ((type == ct_list) && (list_position > -1)) {
-			speak(list[list_position].item, false);
-			if (list[list_position].checked)
-				speak("Checked", false);
-		}
+		if ((type == ct_list) && (list_position > -1)) speak_list_item(false);
 		focused = true;
 	}
+	bool is_disallowed_char(string char, bool search_all = true) {
+		if (char.length() < 1)
+			return false;
+		if (search_all) {
+			for (uint i = 0; i < char.length(); i++) {
+				if (this.disallowed_chars.find(char[i]) < 0 && this.use_only_disallowed_chars) return true;
+				else if (this.disallowed_chars.find(char[i]) > -1 && !this.use_only_disallowed_chars) return true;
+			}
+			return false;
+		}
+		return (this.disallowed_chars.find(char) > -1 && !this.use_only_disallowed_chars) or (this.disallowed_chars.find(char) < 0 && this.use_only_disallowed_chars);
+	}
 	void check(audio_form@ f, int tab_index) {
-		if (type == ct_keyboard_area)
-			return;
 		string char;
 		char = get_characters();
 		if ((type == ct_input) && key_up(KEY_LALT) && (focused)) {
 			if (!read_only) {
 				if (char != "") {
+					if (this.disallowed_chars.length() > 0 && this.is_disallowed_char(char)) {
+						if (this.char_disallowed_description != "") speak(this.char_disallowed_description);
+						return;
+					}
 					if (overwrite)
 						edit(char);
 					else
@@ -2263,10 +2594,20 @@ class control {
 					cut_highlighted();
 				if (((key_down(KEY_LCTRL)) || (key_down(KEY_RCTRL))) && (key_repeating(KEY_V)) || key_pressed(KEY_PASTE))
 					paste_text();
-				if (key_repeating(KEY_BACK))
+				if (key_repeating(KEY_BACK)) {
+					if ((key_down(KEY_LCTRL) || key_down(KEY_RCTRL)) && (sel_start < 0 || sel_end < 0 || sel_start > sel_end)) {
+						delete_word_left();
+						return;
+					}
 					delete_highlighted();
-				if (key_repeating(KEY_DELETE))
+				}
+				if (key_repeating(KEY_DELETE)) {
+					if ((key_down(KEY_LCTRL) || key_down(KEY_RCTRL)) && (sel_start < 0 || sel_end < 0 || sel_start > sel_end)) {
+						delete_word_right();
+						return;
+					}
 					delete_highlighted(1);
+				}
 				if (multiline == true && (multiline_enter == true || (key_down(KEY_LCTRL)) || (key_down(KEY_RCTRL)) || (key_down(KEY_LSHIFT)) || (key_down(KEY_RSHIFT))) && ((key_repeating(KEY_RETURN)) || (key_repeating(KEY_NUMPAD_ENTER))))
 					add_new_line();
 			}
@@ -2363,31 +2704,44 @@ class control {
 			}
 		}
 		if (type == ct_slider) {
-			int increment = 0;
+			double increment = 0;
+			// we don't want to add to the slider_value if it touches the edges.
+			bool slider_edge = false;
 			if (key_repeating(KEY_LEFT) || key_repeating(KEY_DOWN))
-				increment = -1;
+				increment = -slider_step_size;
 			else if (key_repeating(KEY_RIGHT) || key_repeating(KEY_UP))
-				increment = 1;
+				increment = slider_step_size;
 			else if (key_repeating(KEY_PAGEUP))
-				increment = 5;
+				increment = 5 * slider_step_size;
 			else if (key_repeating(KEY_PAGEDOWN))
-				increment = -5;
-			else if (key_repeating(KEY_HOME))
+				increment = 5 * -slider_step_size;
+			else if (key_repeating(KEY_HOME)) {
 				increment = slider_maximum_value;
-			else if (key_repeating(KEY_END))
-				increment = -slider_maximum_value;
-			if (increment == 0)
+				slider_edge = true;
+			} else if (key_repeating(KEY_END)) {
+				increment = slider_minimum_value;
+				slider_edge = true;
+			} else
 				return;
-			int width = slider_maximum_value - slider_minimum_value;
-			if (!key_down(KEY_LCTRL) && !key_down(KEY_RCTRL) && width > 100)
+			int width = floor((slider_maximum_value - slider_minimum_value) / slider_step_size);
+			if (keyboard_modifiers & KEYMOD_CTRL == 0 && width > 100 && !slider_edge) {
 				increment *= (width * 0.025);
-			int new_value = slider_value + increment;
+				// Because we now support doubles, increment multiplication can return numbers with decimal points.
+				// It can set unexpected values if step size is without decimal points.
+				if (slider_step_size % 1 == 0)
+					increment -= increment % 1;
+			}
+			double new_value;
+			if (slider_edge)
+				new_value = increment;
+			else
+				new_value = (increment != 0) ? slider_value + increment : 0;
 			if (new_value < slider_minimum_value)
 				new_value = slider_minimum_value;
 			if (new_value > slider_maximum_value)
 				new_value = slider_maximum_value;
 			if (new_value != slider_value) {
-				int old = slider_value;
+				double old = slider_value;
 				slider_value = new_value;
 				if (@event_callback != null and event_callback(f, tab_index, event_slider, {{"increment", increment}, {"value", slider_value}}) == 1) {
 					slider_value = old;
@@ -2440,11 +2794,7 @@ class control {
 					}
 					if (args.exists("silent")) speak_pos = false;
 				}
-				if (speak_pos) {
-					speak(list[list_position].item, true);
-					if (list[list_position].checked)
-						speak("Checked", false);
-				}
+				if (speak_pos) speak_list_item();
 			}
 			if (key_repeating(KEY_SPACE)) {
 				if ((list_position == -1) || (!list_multiselect))
@@ -2462,16 +2812,12 @@ class control {
 					list[counter].checked = true;
 				speak("All items selected", true);
 			}
-			if (key_repeating(KEY_UP)) {
+			if (key_repeating(list_is_tab_panel ? KEY_LEFT : KEY_UP)) {
 				if (list_position <= 0) {
 					if (list_repeat_boundary_items && list_position == 0) {
 						dictionary args = {{"key", KEY_UP}, {"boundary", true}};
 						if (@event_callback != null and event_callback(f, tab_index, event_list_cursor, args) == 1) return;
-						if (!args.exists("silent")) {
-							speak(list[list_position].item, true);
-							if (list[list_position].checked)
-								speak("Checked", false);
-						}
+						if (!args.exists("silent")) speak_list_item();
 					}
 					return;
 				}
@@ -2481,50 +2827,14 @@ class control {
 					list_position++;
 					return;
 				}
-				if (!args.exists("silent")) {
-					speak(list[list_position].item, true);
-					if (list[list_position].checked)
-						speak("Checked", false);
-				}
+				if (!args.exists("silent")) speak_list_item();
 			}
-			if (key_repeating(KEY_HOME) && (list_position > 0 || list_repeat_boundary_items)) {
-				int old_list_position = list_position;
-				list_position = 0;
-				dictionary args = {{"key", KEY_HOME}};
-				if (@event_callback != null and event_callback(f, tab_index, event_list_cursor, args) == 1) {
-					list_position = old_list_position;
-					return;
-				}
-				if (!args.exists("silent")) {
-					speak(list[list_position].item, true);
-					if (list[list_position].checked)
-						speak("Checked", false);
-				}
-			}
-			if (key_repeating(KEY_END) && (list_position < list.length() - 1 || list_repeat_boundary_items)) {
-				int old_list_position = list_position;
-				list_position = list.length() - 1;
-				dictionary args = {{"key", KEY_END}};
-				if (@event_callback != null and event_callback(f, tab_index, event_list_cursor, args) == 1) {
-					list_position = old_list_position;
-					return;
-				}
-				if (!args.exists("silent")) {
-					speak(list[list_position].item, true);
-					if (list[list_position].checked)
-						speak("Checked", false);
-				}
-			}
-			if (key_repeating(KEY_DOWN)) {
+			if (key_repeating(list_is_tab_panel ? KEY_RIGHT : KEY_DOWN)) {
 				if (list_position >= list_length) {
 					if (list_repeat_boundary_items && list_position == list.length() - 1) {
 						dictionary args = {{"key", KEY_DOWN}, {"boundary", true}};
 						if (@event_callback != null and event_callback(f, tab_index, event_list_cursor, args) == 1) return;
-						if (!args.exists("silent")) {
-							speak(list[list_position].item, true);
-							if (list[list_position].checked)
-								speak("Checked", false);
-						}
+						if (!args.exists("silent")) speak_list_item();
 					}
 					return;
 				}
@@ -2534,11 +2844,27 @@ class control {
 					list_position--;
 					return;
 				}
-				if (!args.exists("silent")) {
-					speak(list[list_position].item, true);
-					if (list[list_position].checked)
-						speak("Checked", false);
+				if (!args.exists("silent")) speak_list_item();
+			}
+			if (key_repeating(KEY_HOME) && (list_position > 0 || list_repeat_boundary_items)) {
+				int old_list_position = list_position;
+				list_position = 0;
+				dictionary args = {{"key", KEY_HOME}};
+				if (@event_callback != null and event_callback(f, tab_index, event_list_cursor, args) == 1) {
+					list_position = old_list_position;
+					return;
 				}
+				if (!args.exists("silent")) speak_list_item();
+			}
+			if (key_repeating(KEY_END) && (list_position < list.length() - 1 || list_repeat_boundary_items)) {
+				int old_list_position = list_position;
+				list_position = list.length() - 1;
+				dictionary args = {{"key", KEY_END}};
+				if (@event_callback != null and event_callback(f, tab_index, event_list_cursor, args) == 1) {
+					list_position = old_list_position;
+					return;
+				}
+				if (!args.exists("silent")) speak_list_item();
 			}
 		}
 		if (type == ct_checkbox) {
@@ -2557,6 +2883,21 @@ class control {
 				if (focused == true)
 					speak_progress();
 			}
+		}
+		if (type == ct_link) {
+			if (!key_pressed(KEY_SPACE) && !pressed)
+				return;
+			pressed = false;
+			if (link_url.empty()) {
+				speak("Error, link url is empty!");
+				return;
+			}
+			if (regexp_match(link_url, "^(https?:\/\/)?(?:[a-zA-Z0-9_-]+(?::[a-zA-Z0-9._%+-]+)?@)?([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(:\d{2,5})?(\/[^\s?#]*)?(\?[^\s#]*)?(#[^\s]*)?$")) {
+			speak("Invalid url (%0)".format(link_url));
+				return;
+			}
+			bool open_response = urlopen(link_url);
+			speak(open_response ? "Opening %0".format(link_url) : "Couldn't open the url. Unexpected error occured!");
 		}
 	}
 	string slider_value_string() {
@@ -2583,20 +2924,21 @@ class control {
 		return col;
 	}
 	bool set_line(int line, int col = 1, bool silent = false) {
-		if (type != ct_input or !multiline) return false;
+		if (type != ct_input) return false;
 		if (col < 1) col = 1;
 		int max_col = col;
 		int pos = 0;
 		if (line > 1)
-			pos = text.find("\n", line - 1);
+			pos = bgt_string_contains(text, "\n", line - 1);
 		if (pos > -1) {
-			int pos2 = text.find("\n", line);
+			int pos2 = bgt_string_contains(text, "\n", line);
 			if (pos2 > -1) max_col = pos2 - pos - 1;
 		} else {
 			if (!silent) speak("line number out of range");
 			return false;
 		}
 		if (col > max_col) col = max_col;
+		if (pos==0) col--;
 		pos += col;
 		cursor = pos;
 		sel_start = -1;
@@ -2625,9 +2967,7 @@ class control {
 				list_position = i;
 				if (!silent) {
 					if (wrapped != "") speak(wrapped);
-					speak(list[list_position].item, wrapped == "");
-					if (list[list_position].checked)
-						speak("Checked", false);
+					speak_list_item();
 				}
 				return true;
 			}
@@ -2771,6 +3111,8 @@ class control {
 			speak(selection + " " + highlight_selection_speech_text, true, false);
 	}
 	void add(string character, bool silent = false) {
+		if(type != ct_input)
+		return;
 		string new_text = text;
 		if (sel_start > -1 && sel_end > -1) {
 			cursor = sel_start;
@@ -2787,9 +3129,9 @@ class control {
 		}
 		if (echo_flag == textflag_characters || echo_flag == textflag_characters_words)
 			speak(input_box_speak(find_appropriate_character(character)), true);
-		if (audioform_word_seperators.find(character) > -1 && (echo_flag == textflag_words || echo_flag == textflag_characters_words)) {
+		if (audioform_word_separators .find(character) > -1 && (echo_flag == textflag_words || echo_flag == textflag_characters_words)) {
 			int temp_position = cursor - 1;
-			while (temp_position > 0 && (temp_position >= text.length() || audioform_word_seperators.find(text[temp_position - 1]) < 0 && text[temp_position - 1] != "\n"))
+			while (temp_position > 0 && (temp_position >= text.length() || audioform_word_separators .find(text[temp_position - 1]) < 0 && text[temp_position - 1] != "\n"))
 				temp_position--;
 			string word = read_word_from_position(temp_position);
 			if (password_mask != "") {
@@ -2809,9 +3151,9 @@ class control {
 			text[cursor] = character;
 		if (echo_flag == textflag_characters || echo_flag == textflag_characters_words)
 			speak(input_box_speak(find_appropriate_character(character)), true);
-		if (audioform_word_seperators.find(character) > -1 && (echo_flag == textflag_words || echo_flag == textflag_characters_words)) {
+		if (audioform_word_separators .find(character) > -1 && (echo_flag == textflag_words || echo_flag == textflag_characters_words)) {
 			int temp_position = cursor - 1;
-			while (temp_position > 0 && (temp_position >= text.length() || audioform_word_seperators.find(text[temp_position - 1]) < 0))
+			while (temp_position > 0 && (temp_position >= text.length() || audioform_word_separators .find(text[temp_position - 1]) < 0))
 				temp_position--;
 			speak(read_word_from_position(temp_position), echo_flag != textflag_characters_words);
 		}
@@ -2928,6 +3270,10 @@ class control {
 			speak("clipboard data can't fit", true);
 			return;
 		}
+		if (this.disallowed_chars.length() > 0 && this.is_disallowed_char(paste)) {
+			if (this.char_disallowed_description != "") speak(this.char_disallowed_description);
+			return;
+		}
 		string new_text = text;
 		if (sel_start > -1 && sel_end > -1) {
 			cursor = sel_start;
@@ -2938,6 +3284,14 @@ class control {
 		text = new_text.substr(0, cursor) + paste + new_text.substr(cursor);
 		cursor += paste.length();
 		speak("Text Pasted", true);
+	}
+	void delete_word_left() {
+		move_word_left(true, false);
+		delete_highlighted(0, false);
+	}
+	void delete_word_right() {
+		move_word_right(true, false);
+		delete_highlighted(0, false);
 	}
 	void delete_highlighted() {
 		delete_highlighted(0);
@@ -3006,7 +3360,7 @@ class control {
 		if (text == "")
 			return -1;
 		int i = cursor;
-		while (i<text.length() and word and i >= 0 and audioform_word_seperators.find(text[i]) > -1)
+		while (i<text.length() and word and i >= 0 and audioform_word_separators .find(text[i]) > -1)
 			i--;
 		for (i; i > -1; i--) {
 			if (i >= text.length() || i == cursor && !word && text[cursor] == "\n")
@@ -3016,18 +3370,22 @@ class control {
 					return i + 1;
 				else
 					return i;
-			} else if (!word && text[i] == "\n" || (word && audioform_word_seperators.find(text[i]) > -1))
+			} else if (!word && text[i] == "\n" || (word && audioform_word_separators .find(text[i]) > -1))
 				return i + 1;
 		}
 		return 0;
 	}
 	string type_to_name() {
 		string name;
-		if (type == ct_button)
+		if (!custom_type.empty())
+			name = custom_type;
+		else if (type == ct_button)
 			name = "Button";
-		if (type == ct_list)
-			name = "List";
-		if (type == ct_input) {
+		else if (type == ct_list) {
+			if (list_is_tab_panel) name = "Tab panel";
+			else name = "List";
+		}
+		else if (type == ct_input) {
 			if (multiline == false)
 				name = "Edit";
 			if (multiline == true)
@@ -3035,20 +3393,22 @@ class control {
 			if (password_mask != "")
 				name = name + " Characters Hidden";
 		}
-		if (type == ct_checkbox) {
+		else if (type == ct_checkbox) {
 			if (checked)
 				name = "Check Box Checked";
 			else
 				name = "Check Box Not Checked";
 		}
-		if (type == ct_progress)
+		else if (type == ct_progress)
 			name = "Progress Bar";
-		if (type == ct_slider)
+		else if (type == ct_slider)
 			name = "Slider";
-		if (type == ct_status_bar)
+		else if (type == ct_status_bar)
 			name = "Status Bar";
-		if (type == ct_keyboard_area)
+		else if (type == ct_keyboard_area)
 			name = "Keyboard Area";
+		else if (type == ct_link)
+			name = "Link";
 		if (enabled == false)
 			name = "Disabled " + name;
 		if (read_only == true)
@@ -3225,9 +3585,9 @@ class control {
 		sel_start = -1;
 		sel_end = -1;
 	}
-	void move_word_left(bool highlighting = false) {
+	void move_word_left(bool highlighting = false, bool speak_selection_status = true) {
 		if (text == "") {
-			speak("Blank");
+			if (speak_selection_status) speak("Blank");
 			return;
 		}
 		if (highlighting) {
@@ -3244,12 +3604,14 @@ class control {
 				sel_start = pos;
 				if (sel_end == -1)
 					sel_end = cursor - 1;
-				speak_selected(text.substr(sel_start, cursor - sel_start));
+				if (speak_selection_status) speak_selected(text.substr(sel_start, cursor - sel_start));
+				else speak(text.substr(sel_start, cursor - sel_start), true, false);
 				cursor = sel_start;
 				return;
 			} else if (cursor == sel_end || cursor - 1 == sel_end) {
 				sel_end = pos - 1;
-				speak(text.substr(pos, cursor - 1 - pos) + " " + highlight_unselection_speech_text, true, false);
+				if (speak_selection_status) speak(text.substr(pos, cursor - 1 - pos) + " " + highlight_unselection_speech_text, true, false);
+				else speak(text.substr(pos, cursor - 1 - pos), true, false);
 				cursor = pos;
 				return;
 			}
@@ -3268,17 +3630,17 @@ class control {
 		cursor = cur_word;
 		speak(read_word_from_position(cur_word), true, false);
 	}
-	void move_word_right(bool highlighting = false) {
+	void move_word_right(bool highlighting = false, bool speak_selection_status = true) {
 		if (text == "" || cursor < 0 || cursor >= text.length()) {
-			speak("Blank");
+			if (speak_selection_status) speak("Blank");
 			return;
 		}
-		bool found_boundary = audioform_word_seperators.find(text[cursor]) > -1;
+		bool found_boundary = audioform_word_separators .find(text[cursor]) > -1;
 		int new_word = -1;
 		for (uint i = cursor; i < text.length(); i++) {
-			if (audioform_word_seperators.find(text[i]) > -1)
+			if (audioform_word_separators .find(text[i]) > -1)
 				found_boundary = true;
-			else if (found_boundary && audioform_word_seperators.find(text[i]) < 0) {
+			else if (found_boundary && audioform_word_separators .find(text[i]) < 0) {
 				new_word = i;
 				break;
 			}
@@ -3292,11 +3654,13 @@ class control {
 				if (sel_start == -1)
 					sel_start = cursor;
 				sel_end = new_word - 1;
-				speak_selected(text.substr(cursor, new_word - cursor));
+				if (speak_selection_status) speak_selected(text.substr(cursor, new_word - cursor));
+				else speak(text.substr(cursor, new_word - cursor), true, false);
 				cursor = new_word;
 				return;
 			} else if (cursor == sel_start || cursor - 1 == sel_start) {
-				speak(text.substr(sel_start, new_word - sel_start) + " " + highlight_unselection_speech_text, true, false);
+				if (speak_selection_status) speak(text.substr(sel_start, new_word - sel_start) + " " + highlight_unselection_speech_text, true, false);
+				else speak(text.substr(sel_start, new_word - sel_start), true, false);
 				sel_start = new_word;
 				cursor = new_word;
 				return;
@@ -3334,9 +3698,9 @@ class control {
 			return "";
 		int word_end = 0;
 		for (int counter = position; counter < text.length(); counter++) {
-			if (word_end < 1 && (audioform_word_seperators.find(text[counter]) > -1 || text[counter] == "\n"))
+			if (word_end < 1 && (audioform_word_separators .find(text[counter]) > -1 || text[counter] == "\n"))
 				word_end = counter;
-			else if (word_end > 0 && (audioform_word_seperators.find(text[counter]) < 0) && (text[counter] != "\n")) {
+			else if (word_end > 0 && (audioform_word_separators .find(text[counter]) < 0) && (text[counter] != "\n")) {
 				word_end = counter;
 				break;
 			}
@@ -3446,6 +3810,11 @@ class control {
 		sel_start = start;
 		sel_end = end;
 	}
+	void speak_list_item(bool interrupt = true) {
+		if (list_is_tab_panel) speak(list[list_position].item + " tab", (interrupt ? true : false));
+		else if (!list_is_tab_panel and list[list_position].checked) speak(list[list_position].item + " Checked", (interrupt ? true : false));
+		else speak(list[list_position].item, (interrupt ? true : false));
+	}
 	/*
 	bool speak(string text, bool interrupt)
 	{
@@ -3490,22 +3859,26 @@ class go_to_index : utility_form {
 		int type = parent.get_control_type(control_index);
 		if (type < 0) return;
 		this.control_index = control_index;
-		if (!parent.is_multiline(control_index) and type != ct_list) {
-			if (type == ct_input)
-				speak("not a multiline text field");
+		if (type != ct_input and type != ct_list)
 			return;
-		}
 		int current = type == ct_list ? parent.get_list_position(control_index) + 1 : parent.get_line_number(control_index);
 		f.create_window((type == ct_list ? "go to item" : "go to line"), false, true);
 		f_index = f.create_input_box((type == ct_list ? "item number" : "line number"), current, "", 6);
+		f.set_enable_go_to_index(f_index, false);
 		f.select_text(f_index, 0, -1);
+		int index_to_focus = f_index;
 		if (type == ct_input) {
 			f_col = f.create_input_box("line column", parent.get_line_column(control_index), "", 6);
 			f.select_text(f_col, 0, -1);
+			f.set_enable_go_to_index(f_col, false);
+			if (!parent.is_multiline(control_index)) {
+				index_to_focus = f_col;
+				f.set_state(f_index, false, false); //Set to hidden because not multiline input.
+			}
 		}
 		f_ok = f.create_button("ok", true);
 		f_cancel = f.create_button("cancel", false, true);
-		f.focus(f_index);
+		f.focus(index_to_focus);
 		@parent.utility_form = this;
 	}
 	void monitor() {
@@ -3627,3 +4000,29 @@ bool key_repeating(int key, int repeat_delay, int prerepeat_delay) {
 	return false;
 }
 
+// BGT's string_contains function takes a number of occurances as a second argument, while string.find takes an offset in bytes. A couple features in audio form use occurances, in which ase providing bgt_string_contains as a utility function is more useful than hacking it's functionality into the places in audio form that need it.
+shared int bgt_string_contains(const string& in str, const string& in search, int occurance = 1) {
+	uint c = 0;
+	int pos = -1;
+	while (c < occurance) {
+		pos = str.find_first(search, pos + 1);
+		if (pos > -1)
+			c++;
+		else
+			break;
+	}
+	return c == occurance ? pos : -1;
+}
+//Wrapper functions for keyboard echo changing.
+shared uint audioform_change_keyboard_echo(int keyboard_echo, int dir = 1) {
+	keyboard_echo += dir;
+	if (keyboard_echo < textflag_none) keyboard_echo = textflag_characters_words;
+	else if (keyboard_echo > textflag_characters_words) keyboard_echo = textflag_none;
+	return keyboard_echo;
+}
+shared string audioform_keyboard_echo_string(int keyboard_echo) {
+	if (keyboard_echo == textflag_characters) return "characters";
+	else if (keyboard_echo == textflag_words) return "words";
+	else if (keyboard_echo == textflag_characters_words) return "characters and words";
+	else return "none";
+}
