@@ -1,1 +1,2 @@
 #include"blackjack/bj.nvgt"
+#include"guessthenumber/*.nvgt"

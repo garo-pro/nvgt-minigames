@@ -1,0 +1,52 @@
+class guess_the_number
+{
+private int tries=1;
+private int guess=0;
+private audio_form form;
+void main() {
+int num=random(1,100);
+form.create_window("Please enter a number from 1 to 100",false,false);
+int a=form.create_input_box("Please enter a number from 1 to 100.","","",3,false,false,false);
+int guess_it=form.create_button("&Guess",true,false);
+int x=form.create_button("&Exit",false,true);
+form.set_state(guess_it,true,false);
+form.set_state(x,true,false);
+f.set_disallowed_chars(a,"1234567890",true);
+form.focus_silently(a);
+while(true)
+{
+wait(5);
+form.monitor();
+if(form.is_pressed(x))
+{
+form.reset();
+return;
+}
+if(form.is_pressed(guess_it))
+{
+guess = parse_int(form.get_text(a));
+form.edit_text(a,"",0,0);
+if (guess<1 or guess > 100) speak("Number must be between 1 and 100");
+else if (guess<num) {
+speak("To low.");
+tries++;
+}
+else if (guess>num) {
+speak("To high.");
+tries++;
+}
+if(tries>10)
+{
+alert("Sorry","You failed the game. the correct number was "+num);
+form.reset();
+return;
+}
+else if (guess==num) {
+alert("success", "You've won the game. It took you "+tries+" tries.");
+form.reset();
+return;
+}
+}
+}
+}
+}

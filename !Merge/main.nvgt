@@ -7,12 +7,12 @@
 #include"games/*.nvgt"
 audio_form f;
 string name = "Mini Games";
-string version = "0.20";
+string version = "0.6";
 string[] games={"blackjack","guess the number","number sort"};
 void main()
 {
 show_window(name+" "+version);
-sd.setup("garo","MiniGames",true,"nvgt");
+sd.setup("garo","MiniGames",false,"nvgt");
 mainmenu();
 }
 void mainmenu()

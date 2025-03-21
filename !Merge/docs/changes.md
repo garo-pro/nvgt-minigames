@@ -6,6 +6,8 @@ The launcher - now the entry point of the application - has been rewritten nearl
 The menu class now has been replaced through a form based self-made bunch of functions. Due this, the API for developers has changed noticeable.
 The entire code should now be indented properly.
 Due an internal backend change, an internet connection is now required for pack updates.
+Changes to the following minigames have been made:
+Guess the number: Using more up to date form metods and changed internal components. Should not affect gameplay. Spelling errors also have been fixed.
 
 Notice: All changelog entries from build 1 and 2 are rather ruck, and just have been kept for archivating purposes. Additionally, the entries are incomplete since they mainly just have been written by Garo from Git commit logs.
 
