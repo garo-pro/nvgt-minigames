@@ -1,4 +1,0 @@
-string get_time_stuff()
-{
-return TIME_HOUR+":"+TIME_MINUTE+":"+TIME_SECOND;
-}

@@ -1,9 +1,0 @@
-Documentation help: How does the documentation viewer works?
-
-When opening the document viewer at startup, you will be presented with a cupple of buttons. These replace a list currently under progress. Every button besides the cancel button will open the documentation by it's name.
-
-If you have opened one of the documentation by the buttons, the window title should change to somehting like this:
-Currently reading: index.
-A read-only field will appear, containing all the files contents. When you've finished reading, you've two buttons you can access with tab. With the first one you can read another document, and with the second one you can close the document viewer.
-
-That should'Ve been everything you need to know about the document viewer.
