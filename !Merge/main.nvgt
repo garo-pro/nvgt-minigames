@@ -1,0 +1,23 @@
+// The actual launcher (entry point as of March 2025) of this project. Written by Garo at the 15th june 2024 and last updated at the 17th March 2025. Thanks to Harry Min Khant for the custom menu include as well as examples and sounds.
+#include"bgt_compat.nvgt"
+#include"form.nvgt"
+#include"settings.nvgt"
+#include"misc/*.nvgt"
+#include"req/*.nvgt"
+#include"games/*.nvgt"
+audio_form f;
+string name = "Mini Games";
+string version = "0.20";
+string[] games={"blackjack","guess the number","number sort"};
+void main()
+{
+show_window(name+" "+version);
+sd.setup("garo","MiniGames",true,"nvgt");
+mainmenu();
+}
+void mainmenu()
+{
+int[] rs = setupmenu("Main menu",true,games,true,true);
+if(rs[0]==0) exit();
+else game_launch(games[rs[1]]);
+}

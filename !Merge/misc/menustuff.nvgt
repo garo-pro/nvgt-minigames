@@ -1,0 +1,31 @@
+int o,c;
+int[] setupmenu(const string name, bool handle, string[] items, bool hidden_cancel_button, bool hidden_confirm_button)
+{
+f.reset();
+int[] rt;
+rt.resize(2);
+f.create_window(name,false,false);
+int item = f.create_list("");
+for(uint i = 0; i < items.length(); i++) f.add_list_item(item,items[i]);
+o = f.create_button("&Ok",true,false,true);
+c = f.create_button("&Cancel",false,true,true);
+if(hidden_confirm_button) f.set_state(o,true,false);
+if(hidden_cancel_button) f.set_state(c,true,false);
+f.focus_silently(item);
+string pressed;
+if(handle)
+{
+while(pressed=="")
+{
+wait(5);
+f.monitor();
+if(f.is_pressed(o)) pressed="o";
+if(f.is_pressed(c)) pressed="c";
+}
+rt[1]=f.get_list_position(item);
+if(pressed=="o") rt[0]=1;
+else rt[0]=0;
+}
+else rt[0]=1;
+return rt;
+}

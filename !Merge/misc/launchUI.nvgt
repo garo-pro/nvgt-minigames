@@ -1,0 +1,25 @@
+string docs = "docs/games";
+settings sd;
+void game_launch(string game)
+{
+int cb;
+string description = file_get_contents(docs+"/"+game+".txt");
+string[] description2 = description.split("\r\n",true);
+if(sd.read_number(game,0)==0)
+{
+setupmenu(game+" dialog. Game description",false,description2,true,true);
+cb = f.create_checkbox("Do&n't show this notice again",false);
+while(true)
+{
+wait(5);
+f.monitor();
+if(f.is_pressed(c)) mainmenu();
+if(f.is_pressed(o))
+{
+if(f.is_checked(cb)) sd.write_number(game,1);
+run_game(game);
+}
+}
+}
+else run_game(game);
+}

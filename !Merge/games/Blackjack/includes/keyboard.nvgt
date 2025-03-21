@@ -1,0 +1,13 @@
+void update_general_kb()
+{
+if(key_pressed(KEY_F1))
+{
+speak(hmsg);
+return;
+}
+if(key_pressed(KEY_F2))
+{
+speak(gsc);
+return;
+}
+}

@@ -1,0 +1,971 @@
+#include"hip.nvgt"
+#include"key_hold.nvgt"
+#include"speech.nvgt"
+#include"form.nvgt"
+timer navtime;
+/*
+Custom menu
+
+By Harry Min Khant
+
+This class requires the Helpful Includes pack (HIP).
+
+This class requires the timer object called navtime, which was already declared in this script. If you have multiple navtime timer though, don't forget to change others to the new!
+*/
+//Error codes
+enum custommenuerrorcodes
+{
+cme_none=0,
+cme_no_special,
+cme_faildelexist,
+cme_run_title_empty,
+cme_alreadyactive,
+cme_canceled,
+cme_outrange,
+cme_invalid_length,
+cme_invalid_type
+}
+enum cmenu_types
+{
+cme_type_text = 0,
+cme_type_checkbox,
+cme_type_slider,
+cme_type_audio,
+cme_type_list
+}
+class menu_item
+{
+string name;
+string ref;
+int type = -1;
+custom_menu@menu_parent;
+bool checked;
+double sd_min,sd_max,sd_index;
+listitem@[] lists(0);
+int listper=-1;
+bool list_multi;
+string listtype;
+bool clickable=true;
+menu_item(string name, string ref, int type, custom_menu@ parent)
+{
+this.name = name;
+this.ref = ref;
+this.type = type;
+@this.menu_parent = parent;
+}
+void on_focus()
+{
+}
+void on_click()
+{
+if(!this.clickable) return;
+this.menu_parent.clicked = this.ref;
+this.menu_parent.play_clicksound();
+}
+}
+class audio_menu_item: menu_item
+{
+audio_menu_item(string name, string ref, custom_menu@parent)
+{
+super(name, ref, cme_type_audio, parent);
+}
+void on_focus()
+{
+if(@this.menu_parent.soundaudio==null)
+{
+sound t;
+@this.menu_parent.soundaudio=t;
+}
+if(this.menu_parent.soundaudio.playing)
+{
+this.menu_parent.soundaudio.close();
+}
+bool successsoundplay=this.menu_parent.soundaudio.stream(this.name);
+if(!successsoundplay)
+{
+this.menu_parent.reset(true);
+return;
+}
+this.menu_parent.soundaudio.play();
+return;
+}
+}
+class slider_menu_item: menu_item
+{
+slider_menu_item(string name, string ref, double indexval, double min, double max, custom_menu@parent)
+{
+super(name, ref, cme_type_slider, parent);
+this.sd_min=min;
+this.sd_max=max;
+this.sd_index=indexval;
+}
+void on_focus()
+{
+speak(this.name+"  slider "+this.sd_index,false);
+this.menu_parent.play_movesound();
+}
+}
+class checkbox_menu_item: menu_item
+{
+checkbox_menu_item(string name, string ref, bool checked, custom_menu@parent)
+{
+super(name, ref, cme_type_checkbox, parent);
+this.checked = checked;
+}
+void on_focus()
+{
+speak(this.name+"  check box "+(this.checked?"checked":"not checked"),false);
+this.menu_parent.play_movesound();
+}
+}
+class list_menu_item: menu_item
+{
+list_menu_item(string name, string ref, bool mulsel, string ltype, custom_menu@parent)
+{
+super(name, ref, cme_type_list, parent);
+this.list_multi = mulsel;
+this.lists.resize(0);
+this.listtype=ltype;
+}
+void on_focus()
+{
+if(this.list_multi)
+{
+double f=0;
+for(uint i=0;i<this.lists.length();i++)
+{
+if(this.lists[i].selected) f++;
+}
+speak(this.name+"  "+this.listtype+" with "+f+" selected",false);
+this.menu_parent.play_movesound();
+return;
+}
+string d;
+if(!is_over_value(this.lists.length(),this.listper)) d=""+this.lists[this.listper].item;
+speak(this.name+"  "+this.listtype+"  "+d,false);
+this.menu_parent.play_movesound();
+}
+void on_click()
+{
+if(!this.clickable) return;
+this.menu_parent.play_clicksound();
+this.menu_parent.list_monitor(this.ref);
+}
+}
+class text_menu_item: menu_item
+{
+text_menu_item(string name, string ref, custom_menu@parent)
+{
+super(name, ref, cme_type_text, parent);
+}
+void on_focus()
+{
+speak(this.name,false);
+this.menu_parent.play_movesound();
+}
+}
+class listitem
+{
+string item, ref;
+bool selected;
+listitem()
+{
+this.item="";
+this.selected=false;
+this.ref=this.item;
+}
+}
+/*
+Declare the class, which will store variables, functions, and methods.
+
+Everything is handled by custom error rather than the default error of which the NVGT provides.
+*/
+class custom_menu
+{
+bool wrap=false, sidescrolling=false;
+bool allowenter=true,allownumpadenter=true,allowrightenter=true;
+bool escapeable=true;
+string clicksound, edgesound, wrapsound, opensound, movesound;
+int ttkey=KEY_TAB; //The key for repeating title, default is tab key, set to -1 on no key.
+bool multinav=true;
+//Private variables and therefore they should not be modified.
+key_hold ckeyup(KEY_UP,300,50);
+key_hold ckeydown(KEY_DOWN,300,60);
+key_hold ckeyleft(KEY_LEFT,300,50);
+key_hold ckeyright(KEY_RIGHT,300,60);
+key_hold ckpagedown(KEY_PAGEDOWN,300,50);
+key_hold ckpageup(KEY_PAGEUP,300,60);
+private menu_item@[]items(0);
+private double line=-1;
+private bool m_running=false;
+private int cm_error=cme_none;
+private string title;
+private bool tell=true;
+string clicked = "";
+private string char,multichar,test;
+private sound sndclick, sndedge, sndwrap, sndopen, sndmove;
+private sound musical;
+sound@ soundaudio;
+double musicvol=0, musicpitch=100;
+private bool say_dialog=true, title_tts=true;
+custom_menu()
+{
+this.clicked = "";
+this.cm_error=cme_none;
+this.m_running=false;
+this.reset(true);
+}
+void reset(bool completely=false)
+{
+this.cm_error=cme_none;
+this.items.resize(0);
+this.clicked = "";
+if(completely)
+{
+m_running=false;
+this.wrap=false;
+this.sidescrolling=false;
+this.allowenter=true;this.allownumpadenter=true;this.allowrightenter=true;
+this.line=-1;
+this.title="";
+this.sndclick.close();
+this.sndmove.close();
+this.sndedge.close();
+this.sndwrap.close();
+this.sndopen.close();
+this.musical.close();
+this.musicvol=0;
+this.musicpitch=100;
+this.say_dialog=true;
+this.title_tts=true;
+@this.soundaudio=null;
+return;
+}
+}
+bool get_running() property
+{
+return this.m_running;
+}
+void create(string ctitle,bool saydialog=false,bool allowoverrun=false, bool is_tts=true)
+{
+if(this.m_running && !allowoverrun)
+{
+this.cm_error=cme_alreadyactive;
+return;
+}
+string d="";
+this.say_dialog=saydialog;
+this.title=ctitle;
+this.title_tts=is_tts;
+this.m_running=true;
+this.speak_title();
+this.clicked = "";
+this.play_opensound();
+return;
+}
+private void speak_title()
+{
+if(this.title_tts)
+{
+speak(this.title+""+(this.say_dialog?"  dialog":""));
+return;
+}
+if(@this.soundaudio==null)
+{
+sound t;
+@this.soundaudio=t;
+}
+if(this.soundaudio.playing)
+{
+this.soundaudio.close();
+}
+bool successsoundplay=this.soundaudio.stream(this.title);
+if(!successsoundplay)
+{
+this.reset(true);
+return;
+}
+this.soundaudio.play();
+return;
+}
+void set_music(string path) property
+{
+if(this.musical.active) this.musical.close();
+this.musical.load(path);
+this.musical.volume=this.musicvol;
+this.musical.pitch=this.musicpitch;
+this.play_music();
+}
+void play_music()
+{
+if(!this.musical.active) return;
+if(!this.musical.playing) this.musical.play_looped();
+}
+void stop_music()
+{
+this.musical.stop();
+this.musical.close();
+}
+void list_monitor(string ref)
+{
+int f=this.get_menu_item(ref);
+if(f<0) return;
+if(this.items[f].type!=cme_type_list) return;
+speak(this.items[f].name+"  "+this.items[f].listtype,false);
+double cc=this.items[f].listper;
+while(true)
+{
+wait(0.5);
+if(navtime.elapsed>1000 and multichar!="")
+multichar="";
+string c=get_characters().lower();
+if(c!="" and multichar!=c)
+{
+navtime.restart();
+multichar+=c;
+}
+if(multichar!="" and c!="")
+{
+multichar=multichar.lower();
+bool found=false;
+for (uint i=cc; i<items[f].lists.length(); i++)
+{
+if(is_over_value(items[f].lists.length(),i)) continue;
+if(i==cc) continue;
+test=this.items[f].lists[i].item;
+test=test.lower();
+if (test.substr(0, multichar.length())==multichar)
+{
+if(this.items[f].lists[cc].item.lower().substr(0, multichar.length())==multichar and multichar.length()>1)
+{
+found=true;
+break;
+}
+if (cc<i)
+cc=i;
+else if (cc>i)
+cc=i;
+if(!is_over_value(items[f].lists.length(),cc))
+{
+string s;
+if(this.items[f].list_multi) s=" check box "+(this.items[f].lists[cc].selected?"checked":"not checked");
+speak(""+this.items[f].lists[cc].item+s,false);
+}
+found=true;
+break;
+}
+}
+if (found==false)
+{
+multichar=multichar.lower();
+for (uint i=0; i<items[f].lists.length(); i++)
+{
+test=this.items[f].lists[i].item;
+test=test.lower();
+if (test.substr(0, multichar.length())==multichar)
+{
+if(!is_over_value(this.items[f].lists.length(),cc) && this.items[f].lists[cc].item.lower().substr(0, multichar.length())==multichar and multichar.length()>1)
+{
+found=true;
+break;
+}
+if (cc<i)
+cc=i;
+else if (cc>i)
+cc=i;
+if(!is_over_value(items[f].lists.length(),cc))
+{
+string s;
+if(this.items[f].list_multi) s=" check box "+(this.items[f].lists[cc].selected?"checked":"not checked");
+speak(""+this.items[f].lists[cc].item+s,false);
+}
+found=true;
+break;
+}
+}
+}
+}
+if(key_pressed(KEY_UP))
+{
+if(cc>0) cc--;
+else if(cc<0) cc=this.items[f].lists.length()-1;
+string s;
+if(this.items[f].list_multi) s=" check box "+(this.items[f].lists[cc].selected?"checked":"not checked");
+speak(""+this.items[f].lists[cc].item+s,false);
+}
+if(key_pressed(KEY_DOWN))
+{
+if(cc<this.items[f].lists.length()-1) cc++;
+else if(cc>=this.items[f].lists.length()) cc=0;
+string s;
+if(this.items[f].list_multi) s=" check box "+(this.items[f].lists[cc].selected?"checked":"not checked");
+speak(""+this.items[f].lists[cc].item+s,false);
+}
+if(key_pressed(KEY_SPACE) && !is_over_value(this.items[f].lists.length(), cc) && this.items[f].list_multi)
+{
+bool ccc=(this.items[f].lists[cc].selected?false:true);
+this.items[f].lists[cc].selected=ccc;
+speak((ccc?"checked":"not checked"));
+}
+if(key_pressed(KEY_RETURN))
+{
+this.items[f].listper=cc;
+break;
+}
+if(key_pressed(KEY_ESCAPE))
+{
+break;
+}
+}//while
+}//end.listmonitor
+bool add_checkbox(string name, string ref, bool checked = false)
+{
+this.cm_error=cme_none;
+if(this.get_menu_item(ref)>-1) return false;
+checkbox_menu_item ch(name, ref, checked, this);
+this.items.insert_last(ch);
+return true;
+}
+bool add_audio(string name, string ref)
+{
+this.cm_error=cme_none;
+if(this.get_menu_item(ref)>-1) return false;
+audio_menu_item ch(name, ref, this);
+this.items.insert_last(ch);
+return true;
+}
+bool add_slider(string i,string ref, double sdindex=0, double sdmin=0, double sdmax=100)
+{
+this.cm_error=cme_none;
+if(this.get_menu_item(ref)>-1) return false;
+this.items.insert_last(slider_menu_item(i, ref, sdindex, sdmin, sdmax, this));
+return true;
+}
+bool add(string i,string ref)
+{
+this.cm_error=cme_none;
+if(this.get_menu_item(ref)>-1) return false;
+this.items.insert_last(text_menu_item(i, ref, this));
+return true;
+}
+bool add_list(string i,string ref, bool multi=false, string listtype="list")
+{
+this.cm_error=cme_none;
+if(this.get_menu_item(ref)>-1) return false;
+this.items.insert_last(list_menu_item(i, ref, multi, listtype, this));
+return true;
+}
+bool add_list_item_to(string ref,string item, string list_ref="", int per=-1, bool select=false)
+{
+this.cm_error=cme_none;
+int f=this.get_menu_item(ref);
+if(f<0) return false;
+if(this.items[f].type!=cme_type_list)
+{
+this.cm_error=cme_invalid_type;
+return false;
+}
+if(list_ref=="") list_ref=item;
+listitem l;
+l.item=item;
+l.ref=list_ref;
+if(this.items[f].list_multi) l.selected=select;
+if(per>-1) this.items[f].lists.insert_at(per, l);
+else this.items[f].lists.insert_last(l);
+return true;
+}
+bool remove_list_item_from(string ref, int per)
+{
+this.cm_error=cme_none;
+int f=this.get_menu_item(ref);
+if(f<0) return false;
+if(this.items[f].type!=cme_type_list)
+{
+this.cm_error=cme_invalid_type;
+return false;
+}
+if(is_over_value(this.items[f].lists.length(),per)) return false;
+@this.items[f].lists[per]=null;
+this.items[f].lists.remove_at(per);
+return true;
+}
+bool remove(string ref)
+{
+this.cm_error=cme_none;
+for(uint i=0;i<this.items.length();i+=1)
+{
+if(this.items[i].ref==ref)
+{
+@this.items[i] = null;
+this.items.remove_at(i);
+return true;
+}
+}
+this.cm_error=cme_faildelexist;
+return false;
+}//end.remove
+bool verify_item_references()
+{
+return this.items.length()>0;
+}
+bool is_clicked(string ref)
+{
+if(ref == "") return false;
+int f = this.get_menu_item(ref);
+if(f<0) return false;
+return this.clicked == ref;
+}
+bool is_checked(string ref)
+{
+if(ref == "") return false;
+int f= this.get_menu_item(ref);
+if(f<0) return false;
+if(this.items[f].type != cme_type_checkbox)
+{
+this.cm_error=cme_invalid_type;
+return false;
+}
+return this.items[f].checked;
+}
+double get_slider_val(string ref)
+{
+if(ref == "") return -1;
+int f= this.get_menu_item(ref);
+if(f<0) return -1;
+if(this.items[f].type != cme_type_slider)
+{
+this.cm_error=cme_invalid_type;
+return -1;
+}
+return this.items[f].sd_index;
+}
+void play_clicksound()
+{
+if(this.clicksound!="" && !this.sndclick.active) this.sndclick.load(this.clicksound);
+if(!this.sndclick.active) return;
+this.sndclick.stop();
+this.sndclick.set_pan(0);
+if(this.sidescrolling) this.sndclick.set_pan((this.line*100)/this.items.length());
+this.sndclick.play();
+}
+void play_movesound()
+{
+if(this.movesound!="" && !this.sndmove.active) this.sndmove.load(this.movesound);
+if(!this.sndmove.active) return;
+this.sndmove.stop();
+this.sndmove.set_pan(0);
+if(this.sidescrolling) this.sndmove.set_pan((this.line*100)/this.items.length());
+this.sndmove.play();
+}
+void play_edgesound()
+{
+if(this.edgesound!="" && !this.sndedge.active) this.sndedge.load(this.edgesound);
+if(!this.sndedge.active) return;
+this.sndedge.stop();
+this.sndedge.set_pan(0);
+if(this.sidescrolling) this.sndedge.set_pan((this.line*100)/this.items.length());
+this.sndedge.play();
+}
+void play_wrapsound()
+{
+if(this.wrapsound!="" && !this.sndwrap.active) this.sndwrap.load(this.wrapsound);
+if(!this.sndwrap.active) return;
+this.sndwrap.stop();
+this.sndwrap.set_pan(0);
+if(this.sidescrolling) this.sndwrap.set_pan((this.line*100)/this.items.length());
+this.sndwrap.play();
+}
+void play_opensound()
+{
+if(this.opensound!="" && !this.sndopen.active) this.sndopen.load(this.opensound);
+this.sndopen.stop();
+this.sndopen.play();
+}
+void monitor()
+{
+if(!this.m_running)
+{
+this.stop_music();
+return;
+}
+this.clicked = "";
+if(this.musical.active)
+{
+if(this.musical.volume!=this.musicvol) this.musical.volume=this.musicvol;
+if(this.musical.pitch!=this.musicpitch) this.musical.pitch=this.musicpitch;
+}
+if(this.title==""||this.title==" ")
+{
+this.cm_error=cme_run_title_empty;
+this.m_running=false;
+this.stop_music();
+return;
+}
+if(!this.verify_item_references())
+{
+this.cm_error=cme_invalid_length;
+this.m_running=false;
+this.stop_music();
+return;
+}
+if(this.tell)
+{
+if(this.items.length()>0 && !is_over_value(items.length(),this.line)) this.items[this.line].on_focus();
+this.tell=false;
+}
+if(this.multinav)
+{
+if(navtime.elapsed>1000 and multichar!="")
+multichar="";
+string c=get_characters().lower();
+if(c!="" and multichar!=c)
+{
+navtime.restart();
+multichar+=c;
+}
+if(multichar!="" and c!="")
+{
+multichar=multichar.lower();
+bool found=false;
+for (uint i=this.line; i<items.length(); i++)
+{
+if(is_over_value(items.length(),i)) continue;
+if(i==this.line) continue;
+test=this.items[i].name;
+test=test.lower();
+if (test.substr(0, multichar.length())==multichar)
+{
+if(this.items[this.line].name.lower().substr(0, multichar.length())==multichar and multichar.length()>1)
+{
+found=true;
+break;
+}
+if (this.line<i)
+this.line=i;
+else if (this.line>i)
+this.line=i;
+if(!is_over_value(items.length(),this.line)) this.items[this.line].on_focus();
+found=true;
+break;
+}
+}
+if (found==false)
+{
+multichar=multichar.lower();
+for (uint i=0; i<items.length(); i++)
+{
+test=this.items[i].name;
+test=test.lower();
+if (test.substr(0, multichar.length())==multichar)
+{
+if(!is_over_value(this.items.length(),this.line) && this.items[this.line].name.lower().substr(0, multichar.length())==multichar and multichar.length()>1)
+{
+found=true;
+break;
+}
+if (this.line<i)
+this.line=i;
+else if (this.line>i)
+this.line=i;
+if(!is_over_value(items.length(),this.line)) this.items[this.line].on_focus();
+found=true;
+break;
+}
+}
+}
+}
+}
+if(!this.verify_item_references())
+{
+this.m_running=false;
+this.cm_error=cme_invalid_length;
+return;
+}
+if(this.ttkey!=-1 && key_pressed(this.ttkey)) this.speak_title();
+if(!key_pressed(KEY_PAGEUP) && ckpageup.pressing)
+{
+if(alt_is_down())
+{
+if(this.musicvol<0) this.musicvol++;
+speak("music volume "+this.musicvol);
+return;
+}
+this.line-=10;
+if(this.line<0) this.line=0;
+this.items[this.line].on_focus();
+}
+if(!key_pressed(KEY_PAGEDOWN) && ckpagedown.pressing)
+{
+if(alt_is_down())
+{
+if(this.musicvol>-100) this.musicvol--;
+speak("music volume "+this.musicvol);
+return;
+}
+this.line+=10;
+if(this.line>items.length()-1) this.line=items.length()-1;
+this.items[this.line].on_focus();
+}
+if((!this.sidescrolling && !key_pressed(KEY_UP) && ckeyup.pressing ) or (this.sidescrolling && !key_pressed(KEY_LEFT) && ckeyleft.pressing))
+{
+if(this.line<0) this.line=this.items.length()-1;
+else if(this.line<=0)
+{
+if(this.wrap)
+{
+this.play_wrapsound();
+this.line=this.items.length()-1;
+}
+else
+{
+this.play_edgesound();
+}
+}
+else if(this.line>0) this.line--;
+if(!is_over_value(items.length(),this.line)) this.items[this.line].on_focus();
+}
+if((!this.sidescrolling && !key_pressed(KEY_DOWN) && ckeydown.pressing ) or (this.sidescrolling && !key_pressed(KEY_RIGHT) && ckeyright.pressing))
+{
+if(this.line>=items.length()-1)
+{
+if(this.wrap)
+{
+this.play_wrapsound();
+this.line=0;
+}
+else
+{
+this.play_edgesound();
+}
+}
+else if(this.line<items.length()-1) this.line++;
+if(!is_over_value(items.length(),this.line)) this.items[this.line].on_focus();
+}
+if(key_pressed(KEY_SPACE) and !is_over_value(this.items.length(), this.line) && this.items[this.line].type == cme_type_checkbox)
+{
+this.items[this.line].checked = (this.items[this.line].checked?false:true);
+speak((this.items[this.line].checked?"checked":"not checked"));
+}
+else if(keyboard_modifiers & KEYMOD_CTRL>0 && key_pressed(KEY_G)) this.goline(this.line+1);
+else if(!is_over_value(this.items.length(), this.line) && this.items[this.line].type == cme_type_slider)
+{
+if((!this.sidescrolling && !key_pressed(KEY_LEFT) && ckeyleft.pressing ) or (this.sidescrolling && !key_pressed(KEY_UP) && ckeyup.pressing))
+{
+if(control_is_down())
+{
+this.items[this.line].sd_index-=10;
+}
+else
+{
+this.items[this.line].sd_index--;
+}
+if(this.items[this.line].sd_index<this.items[this.line].sd_min) this.items[this.line].sd_index=this.items[this.line].sd_min;
+speak(""+this.items[this.line].sd_index);
+}
+if((!this.sidescrolling && !key_pressed(KEY_RIGHT) && ckeyright.pressing ) or (this.sidescrolling && !key_pressed(KEY_DOWN) && ckeydown.pressing))
+{
+if(control_is_down())
+{
+this.items[this.line].sd_index+=10;
+}
+else
+{
+this.items[this.line].sd_index++;
+}
+if(this.items[this.line].sd_index>this.items[this.line].sd_max) this.items[this.line].sd_index=this.items[this.line].sd_max;
+speak(""+this.items[this.line].sd_index);
+}
+}//slider
+if(key_pressed(KEY_RETURN) and this.allowenter && !is_over_value(this.items.length(), this.line))
+{
+this.items[this.line].on_click();
+}
+if(key_pressed(KEY_HOME))
+{
+this.line=0;
+this.items[this.line].on_focus();
+}
+if(key_pressed(KEY_END))
+{
+this.line=items.length()-1;
+this.items[this.line].on_focus();
+}
+else if(this.escapeable && key_pressed(KEY_ESCAPE))
+{
+this.m_running=false;
+this.cm_error=cme_canceled;
+this.stop_music();
+return;
+}
+}//end
+string get_current_ref() property
+{
+if(!this.m_running) return"";
+if(!is_over_value(items.length(),this.line))
+{
+string result=this.items[this.line].ref;
+return result;
+}
+return"";
+}
+string get_click() property
+{
+return this.clicked;
+}
+bool set_text_by_ref(string ref, string caption)
+{
+double f= this.get_menu_item(ref);
+if(f<0) return false;
+this.items[f].name=caption;
+return true;
+}
+bool set_state(string ref, bool clickable)
+{
+double f= this.get_menu_item(ref);
+if(f<0) return false;
+this.items[f].clickable=clickable;
+return true;
+}
+double get_item_length() property
+{
+return this.items.length();
+}
+bool is_running()
+{
+return this.m_running;
+}
+uint[] get_list_selections(string ref)
+{
+uint[] e;
+int f= this.get_menu_item(ref);
+if(f<0) return e;
+if(this.items[f].type!=cme_type_list) return e;
+if(!this.items[f].list_multi) return e;
+for(uint i=0;i<this.items[f].lists.length();i++)
+{
+if(this.items[f].lists[i].selected) e.insert_last(i);
+}
+return e;
+}
+int get_list_position(string ref)
+{
+int f= this.get_menu_item(ref);
+if(f<0) return -1;
+if(this.items[f].type!=cme_type_list) return -1;
+return this.items[f].listper;
+}
+string get_list_item(string ref, int per)
+{
+int f= this.get_menu_item(ref);
+if(f<0) return "";
+if(this.items[f].type!=cme_type_list) return "";
+if(is_over_value(this.items[f].lists.length(), per)) return"";
+return this.items[f].lists[per].item;
+}
+int get_menu_item(string ref)
+{
+for(uint i=0;i<this.items.length();i+=1)
+{
+if(this.items[i].ref == ref) return i;
+}
+return -1;
+}
+double get_position() property
+{
+return this.line;
+}
+bool focus(double per)
+{
+this.cm_error=cme_none;
+if(per<0 || per>=this.items.length())
+{
+this.cm_error=cme_outrange;
+return false;
+}
+this.line=per;
+return true;
+}
+bool focus(string ref)
+{
+this.cm_error=cme_none;
+int f=this.get_menu_item(ref);
+if(f<0)
+{
+this.cm_error=cme_outrange;
+return false;
+}
+this.line=f;
+return true;
+}
+void goline(double ln=1)
+{
+double lf=ln-1;
+audio_form lineform;
+lineform.create_window("go to line",false);
+int a=lineform.create_input_box("line number. Maximum lines is "+this.item_length,ln,"",0,false,false,false);
+int b=lineform.create_button("ok",true,false);
+int c=lineform.create_button("cancel",false,true);
+lineform.focus(a);
+while(true)
+{
+wait(0.5);
+lineform.monitor();
+string lt=lineform.get_text(a);
+if(lineform.is_pressed(b))
+{
+double l=parse_float(lt);
+if(!lt.is_digits())
+{
+lineform.focus(a);
+speak("enter number only");
+}
+else if(l<1)
+{
+lineform.focus(a);
+speak("minimum number out of range.");
+}
+else if(this.items.length()<l)
+{
+lineform.focus(a);
+speak("out of range.");
+}
+else if(this.focus(l-1))
+{
+lineform.reset();
+if(!is_over_value(this.item_length,this.line)) this.items[this.line].on_focus();
+break;
+}
+else
+{
+speak("error occured");
+lineform.focus(a);
+}
+}//if.b.
+else if(lineform.is_pressed(c))
+{
+lineform.reset();
+speak("canceled");
+break;
+}
+}//if.while
+return;
+}//end.goline
+int get_error() property
+{
+return this.cm_error;
+}
+string get_error_info() property
+{
+int aa=this.get_error();
+if(aa==cme_none) return"";
+if(aa==cme_faildelexist) return"bad request: trying to remove the item that does not exist";
+if(aa==cme_no_special) return"the operation cannot be done because of containing special characters used to determine the menu items";
+if(aa==cme_run_title_empty) return"the menu could not run. bad request: the title for the menu is empty";
+if(aa==cme_canceled) return"user choose to cancel";
+if(aa==cme_alreadyactive) return"the menu cannot run. bad request: not allowed overrun";
+if(aa==cme_outrange) return"1 or more parameters are out of range";
+if(aa==cme_invalid_length) return"the items and the references length are not same each other, thus it is invalid for the menu to show up";
+if(aa==cme_invalid_type) return"invalid type";
+return"";
+}
+}//end.class

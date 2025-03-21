@@ -1,0 +1,31 @@
+void bjmainmenu()
+{
+custom_menu c;
+c.add("play game","play");
+c.add("you've been played "+playcount+" times since the last time you ran the game. you've won "+win+" times, draw "+draw+" times, and lost "+lose+" times","playcount");
+c.set_state("playcount",false);
+c.add("exit the game","quit");
+c.create("main menu");
+c.focus(-1);
+while(c.running)
+{
+wait(5);
+c.monitor();
+string r=c.get_click();
+if(r=="play")
+{
+speak("loading...");
+c.reset(true);
+display();
+break;
+}
+else if(r=="quit")
+{
+break;
+}
+}
+speak("exiting...");
+c.reset(true);
+wait(1000);
+exit();
+}//end.mainmenu
