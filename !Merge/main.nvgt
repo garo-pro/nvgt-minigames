@@ -2,6 +2,7 @@
 #include"bgt_compat.nvgt"
 #include"form.nvgt"
 #include"settings.nvgt"
+#include"sound_pool.nvgt"
 #include"misc/*.nvgt"
 #include"req/*.nvgt"
 #include"games/*.nvgt"
