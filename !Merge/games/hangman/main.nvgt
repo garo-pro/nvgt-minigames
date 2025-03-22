@@ -23,17 +23,19 @@ f.set_disallowed_chars(guess,"abcdefghijklmnopqrstuvwxyz",true);
 f.focus(guess);
 while(game_in_progress)
 {
+wait(5);
 f.monitor();
 if(f.get_text(guess)!="")
 {
-game_in_progress=guess_letter(f.get_text(guess));
+guess_letter(f.get_text(guess));
 f.edit_text(guess,"",0,0);
 tries=tries-1;
 }
 if(tries==0) game_in_progress=false;
+if(f.get_text(word)==cword) game_in_progress=false;
 }
-if(tries>0) alert("Congratulations","You have won the game. You needed "+(15-tries)+" tries.");
-else alert("To sad","You lost the game! Much luck next time.");
+if(tries>0) alert("Congratulations","You have won the game. You needed "+(15-tries)+" tries. The word is "+cword+".");
+else alert("To sad","You lost the game! Much luck next time. The word was: "+cword);
 f.reset();
 mainmenu();
 }
