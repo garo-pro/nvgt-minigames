@@ -10,6 +10,7 @@ Guess the number: Using more up to date form metods and changed internal compone
 The whole repository has been given a massive overhaul! IN short, migrations to NVGT 0.89.1 have been completed, many of the scripts and documentation have been changed, and there is now a better building system. If you would like to check it out, you may visit
 [this link](https://github.com/garo-pro/nvgt-minigames/)
 The entire code should now be indented properly, as well. Thanks for pointing me at AStyle!
+There is now developer documentation. Please read it before adding your games to the repository.
 
 The launcher - now the entry point of the application - has been rewritten nearly entirely. Now, basically the entire mini games have been bundled into one big program, in such a way that updating and adding new minigames is easier than ever. This also means we no longer need to fight around with 1000 conflicting includes for each minigame which just needs additional space. From now on, we just can hit one button to generate a Windows package instead of needing to write our own scripts or manually insert everything correctly. Unfortunately this means that the well-served include written by contributor Harry is no longer required, but thanks for creating it!
 The previous change also brings the advantage that now you don't need a documentation reader, instead the documentation will be displaied upon opening the game. You can toggle this behaviour for this in the individual games by pressing tab and then space, and the program will memorize your selection.
