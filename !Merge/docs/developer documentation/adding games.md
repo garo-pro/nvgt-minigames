@@ -14,7 +14,7 @@ When writing your games, please consider these things:
 - If you need to access and safe settings, instead of creating your own code please use the declared sd (settings) class. It is documented, but you can use functions like string sd.read_string(string string_name, string efault_return_value).
     * Notice. The variables are not named this way, just an example for showcase.
 - You are allowed to use multiple files and name them after your wishes, so use that. For a clear codebase, do not place any other files than these which will be compiled inside the directory (e.g. just NVGT scripts without a void main function in no class, so class::main is fine). However, if you need extra assets and sounds, place them in docs/, misc/<gamename> and packsounds for the sounds in any format which should be packed.
-- If possible, use packs instead of sound files.
+- If possible, use packs instead of sound files. Place the compiled pack in sounds, and the corresponding sounds as above explained.
 
 ## Step 3: Linking
 If you are done writing your game*s, please do the following to integrate your game into the launcher.
