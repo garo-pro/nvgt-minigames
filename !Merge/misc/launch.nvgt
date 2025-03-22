@@ -1,10 +1,13 @@
 blackjack bj;
 guess_the_number gtn;
 number_sort ns;
+hangman hm;
 bool run_game(string game)
 {
 if(game=="blackjack") bj.main();
 if(game=="guess the number") gtn.main();
 if(game=="number sort") ns.main();
+if(game=="hangman") hm.main();
+mainmenu();
 return true;
 } 

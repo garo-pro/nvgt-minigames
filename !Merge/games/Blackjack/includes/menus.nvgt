@@ -24,8 +24,7 @@ else if(r=="quit")
 break;
 }
 }
-speak("exiting...");
+speak("exiting...",false);
 c.reset(true);
-wait(1000);
-exit();
+mainmenu();
 }//end.mainmenu

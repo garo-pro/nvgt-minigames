@@ -9,16 +9,22 @@
 audio_form f;
 string name = "Mini Games";
 string version = "0.6";
-string[] games={"blackjack","guess the number","number sort"};
+string[] games={"blackjack","guess the number","number sort","hangmang"};
 void main()
 {
 show_window(name+" "+version);
 sd.setup("garo","MiniGames",false,"nvgt");
+sd.write_number(games[1],1);
 mainmenu();
 }
 void mainmenu()
 {
 int[] rs = setupmenu("Main menu",true,games,true,true);
-if(rs[0]==0) exit();
+if(rs[0]==0)
+{
+hide_game_window();
+sd.close();
+exit();
+}
 else game_launch(games[rs[1]]);
 }

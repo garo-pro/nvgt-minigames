@@ -20,7 +20,7 @@ form.monitor();
 if(form.is_pressed(x))
 {
 form.reset();
-return;
+mainmenu();
 }
 if(form.is_pressed(guess_it))
 {
@@ -39,12 +39,12 @@ if(tries>10)
 {
 alert("Sorry","You failed the game. the correct number was "+num);
 form.reset();
-return;
+mainmenu();
 }
 else if (guess==num) {
 alert("success", "You've won the game. It took you "+tries+" tries.");
 form.reset();
-return;
+mainmenu();
 }
 }
 }

@@ -1,0 +1,71 @@
+string[] letters ={"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"};
+class hangman
+{
+private string cword;
+private timer t;
+private int tries = 15;
+bool game_in_progress = true;
+private int guesses,word,guess;
+void main()
+{
+t.restart();
+cword = words[random(0,words.length())];
+string temp;
+for(uint i = 0; i < cword.length(); i++) temp+="*";
+f.reset();
+f.create_window("Hangman",false,true);
+guesses = f.create_list("Your gu&esses");
+word = f.create_input_box("&Word",temp,"",cword.length(),true,false,false);
+guess = f.create_input_box("gu&ess","","",1,false,false,false);
+int bguess = f.create_button("&guess",true,false,true);
+int cguess = f.create_button("&cancel game",false,true,true);
+f.set_disallowed_chars(guess,"abcdefghijklmnopqrstuvwxyz",true);
+f.focus(guess);
+while(game_in_progress)
+{
+f.monitor();
+if(f.get_text(guess)!="")
+{
+game_in_progress=guess_letter(f.get_text(guess));
+f.edit_text(guess,"",0,0);
+tries=tries-1;
+}
+if(tries==0) game_in_progress=false;
+}
+if(tries>0) alert("Congratulations","You have won the game. You needed "+(15-tries)+" tries.");
+else alert("To sad","You lost the game! Much luck next time.");
+f.reset();
+mainmenu();
+}
+bool guess_letter(string letter)
+{
+int finding = cword.find_first(letter);
+if(finding==-1)
+{
+speak(letter+" couldn't be found.");
+f.add_list_item(guesses,"Failure. Guessed letter: "+letter);
+return true;
+}
+else
+{
+f.edit_text(guess,letter,finding);
+f.add_list_item(guesses,"Success. Guessed letter: "+letter+". Position: "+finding);
+if(cword.find_first(letter,finding)!=-1)
+{
+finding = cword.find_first(letter,finding);
+f.edit_text(guess,letter,finding);
+f.add_list_item(guesses,"Success. Guessed letter: "+letter+". Position: "+finding);
+if(cword.find_first(letter,finding)!=-1)
+{
+finding = cword.find_first(letter,finding);
+f.edit_text(guess,letter,finding);
+f.add_list_item(guesses,"Success. Guessed letter: "+letter+". Position: "+finding);
+speak("You have guessed three positions!");
+}
+else speak("You have guessed two positions!");
+}
+speak(letter+" found on position "+finding);
+return false;
+}
+}
+}
