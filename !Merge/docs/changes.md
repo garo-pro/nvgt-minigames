@@ -1,13 +1,22 @@
 # New in 0.6, build 3:
 As of this version - build 3 - releases are being kept in a progress bar format (y.xx), where y is the main version and xx is the progress to the next version. This allows us to show when we think changes are large enough for an entire version upgrade and does not limit us with just 100 possible progress versions, while still allowing to see the estimated progress for everyone. Thus, the progress for version 1 is currently 60 percent. Builds are still being kept. The changelog is marc down formated now, since the file ending always has been .md
+
 In this update, several new mini games have been added with their corresponding documentation:
-The whole repository has been given a massive overhaul! IN short, migrations to NVGT 0.89.1 have been completed, many of the scripts and documentation have been changed, and there is now a better building system.
-The launcher - now the entry point of the application - has been rewritten nearly entirely. Now, basically the entire mini games have been bundled into one big program, in such a way that updating and adding new minigames is easier than ever. This also means we no longer need to fight around with 1000 conflicting includes for each minigame which just needs additional space. From now on, we just can hit one button to generate a Windows package instead of needing to write our own scripts or manually insert everything correctly. Unfortunately this means that the well-served include written by contributor Harry is no longer required, but thanks for creating it!
-The menu class now has been replaced through a form based self-made bunch of functions. Due this, the API for developers has changed noticeable.
-The entire code should now be indented properly.
-Due an internal backend change, an internet connection is now required for pack updates.
+Hangman: A game where you have limited tries to guess a randomly selected word. Currently it features 120 words from our database.
+
 Changes to the following minigames have been made:
-Guess the number: Using more up to date form metods and changed internal components. Should not affect gameplay. Spelling errors also have been fixed.
+Guess the number: Using more up to date form metods and changed internal components. However, this should not affect gameplay. Several spelling errors within the code and UI such as trys instead of tries also have been fixed.
+
+The whole repository has been given a massive overhaul! IN short, migrations to NVGT 0.89.1 have been completed, many of the scripts and documentation have been changed, and there is now a better building system. If you would like to check it out, you may visit
+[this link](https://github.com/garo-pro/nvgt-minigames/)
+The entire code should now be indented properly, as well. Thanks for pointing me at AStyle!
+
+The launcher - now the entry point of the application - has been rewritten nearly entirely. Now, basically the entire mini games have been bundled into one big program, in such a way that updating and adding new minigames is easier than ever. This also means we no longer need to fight around with 1000 conflicting includes for each minigame which just needs additional space. From now on, we just can hit one button to generate a Windows package instead of needing to write our own scripts or manually insert everything correctly. Unfortunately this means that the well-served include written by contributor Harry is no longer required, but thanks for creating it!
+The previous change also brings the advantage that now you don't need a documentation reader, instead the documentation will be displaied upon opening the game. You can toggle this behaviour for this in the individual games by pressing tab and then space, and the program will memorize your selection.
+The rewrite also removed the debug menu and messages, since they are not required for an end user and generally just have been an unnecessary way of debugging, since when coming to the menu you just would see how long things took in terms of time.
+The menu class now has been replaced through a form based self-made bunch of functions. Due this, the API for developers has changed noticeable. Also, menu sounds are no longer available as of now.
+
+Please note: While we tried to test the new launcher with the best of our abilities, it's not always possible to be accurate, and the more users will test it the more bugs we will find, since we are just a small group of people. Thus, if you find any bug, please open an issue or contact one of the developers if you have their contact data. We attempted to fix pretty much already, but since this is a rewrite of a few kilobytes very important core mechanic code we can't guarant anything. Thanks for understanding!
 
 Notice: All changelog entries from build 1 and 2 are rather ruck, and just have been kept for archivating purposes. Additionally, the entries are incomplete since they mainly just have been written by Garo from Git commit logs.
 
