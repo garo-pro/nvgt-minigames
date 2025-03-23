@@ -17,6 +17,7 @@ start_profiling();
 show_window(name+" "+version);
 sd.setup("garo","MiniGames",false,"nvgt");
 sd.write_number(games[1],1);
+wait(900);
 mainmenu();
 }
 void mainmenu()
