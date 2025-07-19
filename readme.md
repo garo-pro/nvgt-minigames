@@ -1,4 +1,7 @@
 ## NVGT Minigames
+## IMPORTANT NOTICE!:
+As of July 19, 2025, the repository has been discontinued by the main maintainer. While pull requests likely still will be accepted, this repository shouldn't be considered as education resource anymore due it's outdated nature. For example, the way of how the launcher has been written is not the best example of clean code. Additionally some parts of the code currently are not running on the NVGT version 0.90.0-dev. Thanks for all the support along the way.
+
 Welcome to NVGT Minigames, an ever-growing collection of small timewaster games created using the [Nonvisual Gaming Toolkit](https://github.com/samtupy/nvgt). Eventually, we hope to have games in all different categories, from math games, to puzzle games, to word games, and many more.
 Additionally, this collection is open sourced, which means that anyone who wants to add a new game or fix errors in the project can do so, and anyone who wants to learn how any of the games work can look at their source code freely.
 ## Launcher
