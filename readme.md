@@ -1,4 +1,7 @@
 # NVGT mini games
+## IMPORTANT NOTICE!:
+As of July 19, 2025, the repository has been discontinued by the main maintainer. While pull requests likely still will be accepted, this repository shouldn't be considered as education resource anymore due it's outdated nature. For example, the way of how the launcher has been written is not the best example of clean code. Additionally some parts of the code currently are not running on the NVGT version 0.90.0-dev. Thanks for all the support along the way.
+
 Greetings and welcome to NVGT mini games, an evergrowing amount of mini games such as hangman or a simple guess the number game. It aims to provide fun and a good resource for [nvgt](https://github.com/samtupy/nvgt) learners.
 
 Please note: While this is a quite well maintained and structured code base, this by no means is supposed to be a template to code after. Some of the requirements are straight over converted from bgt, and thus are not really optimized. Therefore you surely can take this repository to learn NVGT, however if you see a function or class that looks suspicious you rather should research on your own on how to implement it the best rather than taking a solution which may not works as expected or just in a limited way.

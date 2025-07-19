@@ -1,247 +1,248 @@
 void play_stand(string st)
 {
-if(st==awin)
-{
-win++;
-src::play_wait("win.ogg",s);
-if(bet>0)
-{
-dollars+=bet;
-speak("You've won "+bet+" dollars.",false);
-}
-}
-else if(st=="draw!")
-{
-draw++;
-src::play_wait("bust.ogg",s);
-}
-else if(st==bwin)
-{
-lose++;
-src::play_wait("lose.ogg",s);
-if(bet>0)
-{
-dollars-=bet;
-speak("you've lost "+bet+" dollars!",false);
-src::play_wait("lost_money.ogg",s);
-}
-}
-else
-{
-src::play_wait("push.ogg",s);
-}
-s.load("finished.ogg");
-string mms=get_stand()+"\r\nyour total cards: "+pcl.length()+", making "+ptcn+".\r\ncomputer's total cards: "+dcl.length()+", making "+dtcn+".";
-speak("finished. "+mms,false);
-s.play();
+    if(st==awin)
+    {
+        win++;
+        src::play_wait("win.ogg",s);
+        if(bet>0)
+        {
+            dollars+=bet;
+            speak("You've won "+bet+" dollars.",false);
+        }
+    }
+    else if(st=="draw!")
+    {
+        draw++;
+        src::play_wait("bust.ogg",s);
+    }
+    else if(st==bwin)
+    {
+        lose++;
+        src::play_wait("lose.ogg",s);
+        if(bet>0)
+        {
+            dollars-=bet;
+            speak("you've lost "+bet+" dollars!",false);
+            src::play_wait("lost_money.ogg",s);
+        }
+    }
+    else
+    {
+        src::play_wait("push.ogg",s);
+    }
+    s.load("finished.ogg");
+    string mms=get_stand()+"\r\nyour total cards: "+pcl.length()+", making "+ptcn+".\r\ncomputer's total cards: "+dcl.length()+", making "+dtcn+".";
+    speak("finished. "+mms,false);
+    s.play();
 }
 void display()
 {
-refresh();
-double counter=0;
-string[] items;
-speak("game started. press f1 for help.",false);
-while(true)
-{
-wait(5);
-update_general_kb();
-items.resize(0);
-if(!running)
-{
-items.insert_last("new button");
-items.insert_last("change bet button");
-}
-items.insert_last("you have "+dollars+" dollars");
-items.insert_last("bet, "+bet+" dollars.");
-if(stand) items.insert_last(get_stand());
-if(running)
-{
-items.insert_last("hit button");
-items.insert_last("stand button");
-}
-if(m==t_p)
-{
-if(pcl.length()>0)
-{
-for(uint p=0;p<pcl.length();p++)
-{
-items.insert_last(""+pcl[p]);
-}
-items.insert_last("total card: "+pcl.length());
-items.insert_last("total numbers: "+ptcn);
-}
-}
-if(m==t_d)
-{
-if(dcl.length()>0)
-{
-if(!stand) items.insert_last(""+dcl[0]);
-else
-{
-for(uint p=0;p<dcl.length();p++)
-{
-items.insert_last(""+dcl[p]);
-}
-}
-if(stand)
-{
-items.insert_last("total card: "+dcl.length());
-items.insert_last("total numbers: "+dtcn);
-}
-}
-}
-if(counter<0) counter=0;
-if(counter>=items.length()) counter=items.length()-1;
-if(key_repeating(KEY_UP))
-{
-if(counter>0) counter--;
-speak(items[counter]);
-}
-if(key_repeating(KEY_DOWN))
-{
-if(counter<items.length()-1) counter++;
-speak(items[counter]);
-}
-if(key_repeating(KEY_TAB))
-{
-if(shift_down)
-{
-m--;
-if(m<0) m=modes.length()-1;
-}
-else
-{
-m++;
-if(m>modes.length()-1) m=0;
-}
-speak(get_mode(m));
-}
-if(key_pressed(KEY_ESCAPE))
-{
-if(running)
-{
-speak("finish the current game first");
-}
-else break;
-}
-if(get_ptcn()>21 && !stand)
-{
-standgame();
-}
-if(key_pressed(KEY_N))
-{
-newgame();
-}
-if(key_pressed(KEY_H) && !stand && running)
-{
-hitgame();
-}
-if(key_pressed(KEY_C))
-{
-display_your_card_information();
-}
-if(key_pressed(KEY_S)  && !stand && running)
-{
-standgame();
-}
-if(key_pressed(KEY_RETURN))
-{
-string rs=""+items[counter];
-if(rs=="new button")
-{
-newgame();
-}
-else if(rs=="hit button")
-{
-hitgame();
-}
-else if(rs=="stand button")
-{
-standgame();
-}
-else if(rs=="change bet button")
-{
-changebet();
-}
-}//return(KEY)
-if(get_ptcn()==21 && !stand && running)
-{
-sound bj21;
-src::play("got21.ogg",bj21);
-speak("good, you have a blackjack!",false);
-wait(750);
-uint64 bt=bet;
-bet=bet+bet;
-standgame();
-bet=bt;
-}
-}//while
-mainmenu();
+    refresh();
+    double counter=0;
+    string[] items;
+    speak("game started. press f1 for help.",false);
+    while(true)
+    {
+        wait(5);
+        update_general_kb();
+        items.resize(0);
+        if(!running)
+        {
+            items.insert_last("new button");
+            items.insert_last("change bet button");
+        }
+        items.insert_last("you have "+dollars+" dollars");
+        items.insert_last("bet, "+bet+" dollars.");
+        if(stand) items.insert_last(get_stand());
+        if(running)
+        {
+            items.insert_last("hit button");
+            items.insert_last("stand button");
+        }
+        if(m==t_p)
+        {
+            if(pcl.length()>0)
+            {
+                for(uint p=0; p<pcl.length(); p++)
+                {
+                    items.insert_last(""+pcl[p]);
+                }
+                items.insert_last("total card: "+pcl.length());
+                items.insert_last("total numbers: "+ptcn);
+            }
+        }
+        if(m==t_d)
+        {
+            if(dcl.length()>0)
+            {
+                if(!stand) items.insert_last(""+dcl[0]);
+                else
+                {
+                    for(uint p=0; p<dcl.length(); p++)
+                    {
+                        items.insert_last(""+dcl[p]);
+                    }
+                }
+                if(stand)
+                {
+                    items.insert_last("total card: "+dcl.length());
+                    items.insert_last("total numbers: "+dtcn);
+                }
+            }
+        }
+        if(counter<0) counter=0;
+        if(counter>=items.length()) counter=items.length()-1;
+        if(key_repeating(KEY_UP))
+        {
+            if(counter>0) counter--;
+            speak(items[counter]);
+        }
+        if(key_repeating(KEY_DOWN))
+        {
+            if(counter<items.length()-1) counter++;
+            speak(items[counter]);
+        }
+        if(key_repeating(KEY_TAB))
+        {
+            if(shift_down)
+            {
+                m--;
+                if(m<0) m=modes.length()-1;
+            }
+            else
+            {
+                m++;
+                if(m>modes.length()-1) m=0;
+            }
+            speak(get_mode(m));
+        }
+        if(key_pressed(KEY_ESCAPE))
+        {
+            if(running)
+            {
+                speak("finish the current game first");
+            }
+            else break;
+        }
+        if(get_ptcn()>21 && !stand)
+        {
+            standgame();
+        }
+        if(key_pressed(KEY_N))
+        {
+            newgame();
+        }
+        if(key_pressed(KEY_H) && !stand && running)
+        {
+            hitgame();
+        }
+        if(key_pressed(KEY_C))
+        {
+            display_your_card_information();
+        }
+        if(key_pressed(KEY_S)  && !stand && running)
+        {
+            standgame();
+        }
+        if(key_pressed(KEY_RETURN))
+        {
+            string rs=""+items[counter];
+            if(rs=="new button")
+            {
+                newgame();
+            }
+            else if(rs=="hit button")
+            {
+                hitgame();
+            }
+            else if(rs=="stand button")
+            {
+                standgame();
+            }
+            else if(rs=="change bet button")
+            {
+                changebet();
+            }
+        }//return(KEY)
+        if(get_ptcn()==21 && !stand && running)
+        {
+            sound bj21;
+            src::play("got21.ogg",bj21);
+            speak("good, you have a blackjack!",false);
+            wait(750);
+            uint64 bt=bet;
+            bet=bet+bet;
+            standgame();
+            bet=bt;
+        }
+    }//while
+    mainmenu();
 }//end
 void newgame()
 {
-if(bet>0 && dollars<bet)
-{
-speak("sorry, you don't have enough dollars that you are currently bet. you only have "+dollars+" dollars");
-return;
-}
-refresh();
-speak("new game started",false);
-running=true;
-src::play_wait("shuffle.ogg",s);
-speak("your cards",false);
-double ha=hit();
-src::play_wait("draw.ogg",s);
-speak(""+ha,false);
+    if(bet>0 && dollars<bet)
+    {
+        speak("sorry, you don't have enough dollars that you are currently bet. you only have "+dollars+" dollars");
+        return;
+    }
+    refresh();
+    speak("new game started",false);
+    running=true;
+    src::play_wait("shuffle.ogg",s);
+    speak("your cards",false);
+    double ha=hit();
+    src::play_wait("draw.ogg",s);
+    speak(""+ha,false);
 
-ha=hit();
-src::play_wait("draw.ogg",s);
-speak(""+ha,false);
-dhit();dhit();
+    ha=hit();
+    src::play_wait("draw.ogg",s);
+    speak(""+ha,false);
+    dhit();
+    dhit();
 }
 void hitgame()
 {
-double h=hit();
-speak("hits "+h);
-src::play_wait("draw.ogg",s);
+    double h=hit();
+    speak("hits "+h);
+    src::play_wait("draw.ogg",s);
 }
 void standgame()
 {
-playcount++;
-for(uint ia=0;ia<listl;ia++)
-{
-try_dhit();
-}
-stand=true;
-running=false;
-speak("standed!",false);
-src::play_wait("stand.ogg",s);
-play_stand(get_stand());
+    playcount++;
+    for(uint ia=0; ia<listl; ia++)
+    {
+        try_dhit();
+    }
+    stand=true;
+    running=false;
+    speak("standed!",false);
+    src::play_wait("stand.ogg",s);
+    play_stand(get_stand());
 }
 void display_your_card_information()
 {
-if(pcl.length()<1)
-{
-speak("no cards");
-return;
-}
-string msr=listing.convert(pcl);
-string ms=msr+"; making "+ptcn+".\r\n";
-ms+="total cards, "+pcl.length();
-speak(ms);
+    if(pcl.length()<1)
+    {
+        speak("no cards");
+        return;
+    }
+    string msr=listing.convert(pcl);
+    string ms=msr+"; making "+ptcn+".\r\n";
+    ms+="total cards, "+pcl.length();
+    speak(ms);
 }
 void changebet()
 {
-input.reset();
-string f=input.input("type the amount to bet");
-if(f=="") return;
-uint64 bdd=parse_float(f);
-if(bdd>dollars)
-{
-speak("error. you cannot bet more than what you already have, maximum of "+dollars+" dollars.");
-return;
-}
-bet=bdd;
-speak("changed bet success!");
-src::play_wait("bet_changed.ogg",s);
+    input.reset();
+    string f=input.input("type the amount to bet");
+    if(f=="") return;
+    uint64 bdd=parse_float(f);
+    if(bdd>dollars)
+    {
+        speak("error. you cannot bet more than what you already have, maximum of "+dollars+" dollars.");
+        return;
+    }
+    bet=bdd;
+    speak("changed bet success!");
+    src::play_wait("bet_changed.ogg",s);
 }

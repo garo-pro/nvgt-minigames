@@ -1,83 +1,83 @@
 class hangman
 {
-private string cword,cword2;
-private string[]@ letters={""};
-private int tries = 15;
-bool game_in_progress = true;
-private int guesses,word,guess;
-void main()
-{
-if(tries!=15) tries=15;
-if(!game_in_progress) game_in_progress=true;
-if(letters.length()>0) letters.resize(0);
-cword = words[random(0,words.length())];
-for(uint i = 0; i < cword.length(); i++) cword2+="*";
-f.reset();
-f.create_window("Hangman",false,true);
-guesses = f.create_list("Your gu&esses");
-word = f.create_input_box("&Word",cword2,"",cword.length(),true,false,false);
-guess = f.create_input_box("gu&ess","","",1,false,false,false);
-int bguess = f.create_button("&guess",true,false,true);
-int cguess = f.create_button("&cancel game",false,true,true);
-f.set_disallowed_chars(guess,"abcdefghijklmnopqrstuvwxyz",true);
-f.focus(guess);
-while(game_in_progress)
-{
-wait(5);
-f.monitor();
-if(f.get_text(guess)!=""&&!already_guessed(f.get_text(guess)))
-{
-guess_letter(f.get_text(guess));
-letters.insert_last(f.get_text(guess));
-f.edit_text(guess,"",0,0);
-tries=tries-1;
-}
-else if(f.get_text(guess)!=""&&already_guessed(f.get_text(guess)))
-{
-speak("You already guessed this letter.");
-f.edit_text(guess,"",0,0);
-}
-if(tries==0) game_in_progress=false;
-if(f.get_text(word)==cword) game_in_progress=false;
-if(f.is_pressed(cguess)) mainmenu();
-}
-if(f.get_text(word)==cword) alert("Congratulations","You have won the game. You needed "+(15-tries)+" tries. The word is "+cword+".");
-else alert("To sad","You lost the game! Much luck next time. The word was: "+cword);
-f.reset();
-mainmenu();
-}
-bool guess_letter(string letter)
-{
-int finding = cword.find_first(letter);
-if(finding==-1)
-{
-speak(letter+" couldn't be found.");
-f.add_list_item(guesses,"Failure. Guessed letter: "+letter);
-return true;
-}
-else
-{
-f.edit_text(word,letter,finding);
-f.add_list_item(guesses,"Success. Guessed letter: "+letter+". Position: "+finding);
-if(cword.find_first(letter,finding)!=-1)
-{
-finding = cword.find_first(letter,finding);
-f.edit_text(guess,letter,finding);
-if(cword.find_first(letter,finding)!=-1)
-{
-finding = cword.find_first(letter,finding);
-f.edit_text(guess,letter,finding);
-speak("You have guessed three positions!");
-}
-else speak("You have guessed two positions!");
-}
-speak(letter+" found on position "+finding);
-return false;
-}
-}
-bool already_guessed(string letter)
-{
-for(uint i = 0; i < letters.length(); i++) if(letter==letters[i]) return true;
-return false;
-}
+    private string cword,cword2;
+    private string[]@ letters= {""};
+    private int tries = 15;
+    bool game_in_progress = true;
+    private int guesses,word,guess;
+    void main()
+    {
+        if(tries!=15) tries=15;
+        if(!game_in_progress) game_in_progress=true;
+        if(letters.length()>0) letters.resize(0);
+        cword = words[random(0,words.length())];
+        for(uint i = 0; i < cword.length(); i++) cword2+="*";
+        f.reset();
+        f.create_window("Hangman",false,true);
+        guesses = f.create_list("Your gu&esses");
+        word = f.create_input_box("&Word",cword2,"",cword.length(),true,false,false);
+        guess = f.create_input_box("gu&ess","","",1,false,false,false);
+        int bguess = f.create_button("&guess",true,false,true);
+        int cguess = f.create_button("&cancel game",false,true,true);
+        f.set_disallowed_chars(guess,"abcdefghijklmnopqrstuvwxyz",true);
+        f.focus(guess);
+        while(game_in_progress)
+        {
+            wait(5);
+            f.monitor();
+            if(f.get_text(guess)!=""&&!already_guessed(f.get_text(guess)))
+            {
+                guess_letter(f.get_text(guess));
+                letters.insert_last(f.get_text(guess));
+                f.edit_text(guess,"",0,0);
+                tries=tries-1;
+            }
+            else if(f.get_text(guess)!=""&&already_guessed(f.get_text(guess)))
+            {
+                speak("You already guessed this letter.");
+                f.edit_text(guess,"",0,0);
+            }
+            if(tries==0) game_in_progress=false;
+            if(f.get_text(word)==cword) game_in_progress=false;
+            if(f.is_pressed(cguess)) mainmenu();
+        }
+        if(f.get_text(word)==cword) alert("Congratulations","You have won the game. You needed "+(15-tries)+" tries. The word is "+cword+".");
+        else alert("To sad","You lost the game! Much luck next time. The word was: "+cword);
+        f.reset();
+        mainmenu();
+    }
+    bool guess_letter(string letter)
+    {
+        int finding = cword.find_first(letter);
+        if(finding==-1)
+        {
+            speak(letter+" couldn't be found.");
+            f.add_list_item(guesses,"Failure. Guessed letter: "+letter);
+            return true;
+        }
+        else
+        {
+            f.edit_text(word,letter,finding);
+            f.add_list_item(guesses,"Success. Guessed letter: "+letter+". Position: "+finding);
+            if(cword.find_first(letter,finding)!=-1)
+            {
+                finding = cword.find_first(letter,finding);
+                f.edit_text(guess,letter,finding);
+                if(cword.find_first(letter,finding)!=-1)
+                {
+                    finding = cword.find_first(letter,finding);
+                    f.edit_text(guess,letter,finding);
+                    speak("You have guessed three positions!");
+                }
+                else speak("You have guessed two positions!");
+            }
+            speak(letter+" found on position "+finding);
+            return false;
+        }
+    }
+    bool already_guessed(string letter)
+    {
+        for(uint i = 0; i < letters.length(); i++) if(letter==letters[i]) return true;
+        return false;
+    }
 }

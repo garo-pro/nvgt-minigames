@@ -1,31 +1,32 @@
-int o,c;
+int o,c; // Allows the user to access OK and Cancel buttons externally.
 int[] setupmenu(const string name, bool handle, string[] items, bool hidden_cancel_button, bool hidden_confirm_button)
 {
-f.reset();
-int[] rt;
-rt.resize(2);
-f.create_window(name,false,false);
-int item = f.create_list("");
-for(uint i = 0; i < items.length(); i++) f.add_list_item(item,items[i]);
-o = f.create_button("&Ok",true,false,true);
-c = f.create_button("&Cancel",false,true,true);
-if(hidden_confirm_button) f.set_state(o,true,false);
-if(hidden_cancel_button) f.set_state(c,true,false);
-f.focus_silently(item);
-string pressed;
-if(handle)
-{
-while(pressed=="")
-{
-wait(5);
-f.monitor();
-if(f.is_pressed(o)) pressed="o";
-if(f.is_pressed(c)) pressed="c";
-}
-rt[1]=f.get_list_position(item);
-if(pressed=="o") rt[0]=1;
-else rt[0]=0;
-}
-else rt[0]=1;
-return rt;
+    f.reset();
+    int[] rt; // Return array
+    rt.resize(2); // Prepare the array for later inserting.
+    f.create_window(name,false,false);
+    int item = f.create_list("");
+    for(uint i = 0; i < items.length(); i++) f.add_list_item(item,items[i]);
+    o = f.create_button("&Ok",true,false,true);
+    c = f.create_button("&Cancel",false,true,true);
+    if(hidden_confirm_button) f.set_state(o,true,false);
+    if(hidden_cancel_button) f.set_state(c,true,false);
+    f.focus_silently(item);
+    string pressed; // This string will be used to determine what button has been pressed at last. As long as it's empty, the loop below runs through.
+    if(handle)
+    {
+        while(pressed=="")
+        {
+            wait(5);
+            f.monitor();
+            if(f.is_pressed(o)) pressed="o";
+            if(f.is_pressed(c)) pressed="c";
+// Setting the pressed string to a button value and thus ending the void.
+        }
+        rt[1]=f.get_list_position(item); // Sets the second element of the array to the current list focus regardless of cancel or ok button being pressed.
+        if(pressed=="o") rt[0]=1; // If the ok default button has been returned, the value will be 1.
+        else rt[0]=0; // If not, the value is 0.
+    }
+    else rt[0]=1; // returns 1 in element 0 since it managed to set up the menu, and no loop was requisted in bool handle.
+    return rt; // Finally, returns the array.
 }

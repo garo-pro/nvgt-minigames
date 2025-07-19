@@ -1,0 +1,4 @@
+void settingsm() {
+    f.reset();
+    speak("Currently not available. Please check back later");
+}

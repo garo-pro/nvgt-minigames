@@ -9,7 +9,7 @@
 audio_form f;
 string name = "Mini Games";
 string version = "0.6";
-string[] games={"blackjack","guess the number","number sort","hangman"};
+string[] games= {"blackjack","guess the number","number sort","hangman"};
 bool profiling = false;
 void main()
 {
@@ -22,7 +22,7 @@ mainmenu();
 }
 void mainmenu()
 {
-int[] rs = setupmenu("Main menu",true,games,true,true);
+int[] rs = setupmenu("Main menu",true,strarray_join(games, {"settings"}),true,true);
 if(rs[0]==0)
 {
 hide_game_window();
@@ -35,6 +35,16 @@ f.write(generate_profile());
 f.close();
 }
 exit();
+} 
+else
+{
+if(rs[1]!=(games.length()+1)) game_launch(games[rs[1]]);
+else settingsm();
 }
-else game_launch(games[rs[1]]);
+}
+// Function to merge two arrays.
+string[]@ strarray_join(string[]@ r1, string[]@ r2) {
+string[] r = r1;
+r.extend(r2);
+return r;
 }

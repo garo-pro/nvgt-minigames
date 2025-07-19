@@ -4,86 +4,86 @@ This class provides saving and loading data, probably used on games to save the 
 class savedata
 {
 //Internal variables for the class.
-string key;
-string fn;
-private dictionary d;
+    string key;
+    string fn;
+    private dictionary d;
 //The constructor
-savedata(string filename, string enckey="")
-{
-fn=filename;
-key=enckey;
-}
+    savedata(string filename, string enckey="")
+    {
+        fn=filename;
+        key=enckey;
+    }
 //The function to load the saved data into the dictionary.
-bool load()
-{
-file f;
+    bool load()
+    {
+        file f;
 //fn is our previously declared filename string, so use that.
-bool suc=f.open(fn,"rb");
-if(!suc) return false;
-d=loaddict(f.read());
+        bool suc=f.open(fn,"rb");
+        if(!suc) return false;
+        d=loaddict(f.read());
 //Close the file
-f.close();
-return true;
-}
+        f.close();
+        return true;
+    }
 //Function to save the data into the file.
-bool save()
-{
-if(this.d.get_keys().length()<1) return false;
-file f;
-f.open(fn,"wb");
-f.write(savedict(d));
-f.close();
-return true;
-}
+    bool save()
+    {
+        if(this.d.get_keys().length()<1) return false;
+        file f;
+        f.open(fn,"wb");
+        f.write(savedict(d));
+        f.close();
+        return true;
+    }
 //Function to add a value.
-void add(string name, any@ val)
-{
-if(@val==null) return;
-string sdstr;
-double sddouble;
-int sdint;
-bool sdbool;
-if(val.retrieve(sdstr)) this.d.set(name, sdstr);
-else if(val.retrieve(sddouble)) this.d.set(name, sddouble);
-else if(val.retrieve(sdint)) this.d.set(name, sdint);
-else if(val.retrieve(sdbool)) this.d.set(name, sdbool);
-}
+    void add(string name, any@ val)
+    {
+        if(@val==null) return;
+        string sdstr;
+        double sddouble;
+        int sdint;
+        bool sdbool;
+        if(val.retrieve(sdstr)) this.d.set(name, sdstr);
+        else if(val.retrieve(sddouble)) this.d.set(name, sddouble);
+        else if(val.retrieve(sdint)) this.d.set(name, sdint);
+        else if(val.retrieve(sdbool)) this.d.set(name, sdbool);
+    }
 //Function to read
-var@ read(string name)
-{
-string sdstr;
-double sddouble;
-int sdint;
-bool sdbool;
-if(this.d.get(name,sdstr)) return sdstr;
-else if(this.d.get(name,sddouble)) return sddouble;
-else if(this.d.get(name,sdint)) return sdint;
-else if(this.d.get(name,sdbool)) return sdbool;
-else return null;
-}
-string[] get_keys() property
-{
-return this.d.get_keys();
-}
-bool exists(string k)
-{
-return this.d.exists(k);
-}
-void clear()
-{
-this.d.delete_all();
-}
-private dictionary loaddict(string data)
-{
+    var@ read(string name)
+    {
+        string sdstr;
+        double sddouble;
+        int sdint;
+        bool sdbool;
+        if(this.d.get(name,sdstr)) return sdstr;
+        else if(this.d.get(name,sddouble)) return sddouble;
+        else if(this.d.get(name,sdint)) return sdint;
+        else if(this.d.get(name,sdbool)) return sdbool;
+        else return null;
+    }
+    string[] get_keys() property
+    {
+        return this.d.get_keys();
+    }
+    bool exists(string k)
+    {
+        return this.d.exists(k);
+    }
+    void clear()
+    {
+        this.d.delete_all();
+    }
+    private dictionary loaddict(string data)
+    {
 //This function loads the data to the dictionary.
-if(this.key!="") data=string_aes_decrypt(data,this.key);
-dictionary d=deserialize(data);
-return d;
-}
-private string savedict(dictionary@ d)
-{
-string fa=d.serialize();
-if(this.key!="") fa=string_aes_encrypt(fa,this.key);
-return fa;
-}
+        if(this.key!="") data=string_aes_decrypt(data,this.key);
+        dictionary d=deserialize(data);
+        return d;
+    }
+    private string savedict(dictionary@ d)
+    {
+        string fa=d.serialize();
+        if(this.key!="") fa=string_aes_encrypt(fa,this.key);
+        return fa;
+    }
 }//end.class
