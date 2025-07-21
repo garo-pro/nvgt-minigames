@@ -1,6 +1,5 @@
 // Documentation viewer. Written by Garo at the 9th june 2024. Last updated by Harry Min Khant at 13th June 2024
 #include"form.nvgt"
-#include"file_contents.nvgt"
 audio_form f;
 string folder="documentation";
 string extention="txt";
@@ -35,7 +34,7 @@ f.add_list_item(l,docs[i],docs[i]);
 }
 f.set_list_position(l,f.get_list_index_by_id(l,what));
 int read=-1;
-if(what!="") read=f.create_input_box("&Text",get_file_contents(folder+"/"+what+"."+extention),"",0,true,true,false);
+if(what!="") read=f.create_input_box("&Text",file_get_contents(folder+"/"+what+"."+extention),"",0,true,true,false);
 int open=f.create_button("&Open the selected document",true,false);
 f.focus((read>-1?read:l));
 int e1=f.create_button("&Exit",false,true);

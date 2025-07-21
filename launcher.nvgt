@@ -12,9 +12,9 @@ script_detect scripting;
 void main()
 {
 if(debugging) d_log+="Starting. "+get_time_stuff()+".\r\n";
-add_program("Blackjack","blackjack/source","bj");
-add_program("Guess The Number","guess_the_number","guess_the_number");
-add_program("Number Sort","number_sort","game");
+add_program("Blackjack","Games/blackjack","bj");
+add_program("Guess The Number","Games/guess_the_number","guess_the_number");
+add_program("Number Sort","Games/number_sort","game");
 add_program("Documentation","","documentation");
 if(SCRIPT_COMPILED)
 {

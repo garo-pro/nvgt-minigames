@@ -1,6 +1,6 @@
 #include "bgt_compat.nvgt"
 file f;
-pack pfile;
+pack_file pfile;
 bool encrypt;
 string[] folder;
 string encryption_key;
@@ -41,17 +41,17 @@ encryption_key=b[3];
 }
 else if (cont==true)
 {
-filename=input_box("pack creator", "enter the name of the pack you wish to create");
+filename=input_box("pack creater", "enter the name of the pack you wish to create");
 if (filename=="")
 {
 exit();
 }
-foldername=input_box("pack creator", "enter the path that the files you wish to pack are contained.");
+foldername=input_box("pack creater", "enter the path that the files you wish to pack are contained.");
 if (foldername=="")
 {
 exit();
 }
-int answer=question("pack creator", "would you like these files to be encrypted");
+int answer=question("pack creater", "would you like these files to be encrypted");
 if (answer==1)
 {
 encrypt=true;
@@ -77,7 +77,7 @@ f.close();
 }
 if (silent==false)
 show_game_window("creating pack file...");
-if(!pfile.open(filename, PACK_OPEN_MODE_CREATE))
+if(!pfile.create(filename, encryption_key))
 {
 alert("error", "failed to create pack!");
 exit();
@@ -90,7 +90,7 @@ exit();
 }
 find_stuff(foldername);
 if (silent==false)
-alert("pack creator", "there are "+fol.length()+" files in the pack. Hit OK to start packing!");
+alert("pack creater", "there are "+fol.length()+" files in the pack. Hit OK to start packing!");
 for (uint i=0; i<fol.length(); i++)
 {
 if (silent==false)

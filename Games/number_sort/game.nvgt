@@ -17,12 +17,12 @@ int gametime=30000;
 sound_pool p;
 sound music;
 menu m;
-pack pk;
+pack_file pk;
 void main()
 {
-show_window("Number sort");
-pk.open("sounds.dat",PACK_OPEN_MODE_READ);
+pk.open("sounds.dat", "izD@YwfsOe*Z2pB_U9lY");
 @sound_default_pack=pk;
+show_window("Number sort");
 music.load("music.ogg");
 music.volume=-18;
 wait(500);
